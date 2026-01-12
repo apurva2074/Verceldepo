@@ -1,0 +1,81 @@
+:root {
+  --sidebar-w: 240px; /* Aligned with original intent but tightened */
+  --topbar-h: 80px;
+  --gutter: 24px;
+  --card-bg: #ffffff;
+  --muted: #7b8b9a;
+  --page-bg: #f8fafc;
+}
+
+body {
+  background: var(--page-bg);
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: #0b1b33;
+}
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Fix: Ensured solid background and correct z-index */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid rgba(12,30,60,0.05);
+  z-index: 100;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.main-area {
+  margin-left: var(--sidebar-w); /* Offsets content from fixed sidebar */
+  flex: 1;
+  padding: 24px 32px;
+  box-sizing: border-box;
+  width: calc(100% - var(--sidebar-w));
+}
+
+.od-content {
+  width: 100%;
+  max-width: 1300px; /* Prevents layout from stretching too thin on wide screens */
+}
+
+/* Dashboard Grid: Tightened the profile column to give properties more room */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr; 
+  gap: 24px;
+  align-items: start;
+}
+
+.properties-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Button Fix: Prevents text wrapping seen in your screenshot */
+.btn-add {
+  background: linear-gradient(90deg, #3766f7, #4a5ff0);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap; /* CRITICAL: Fixes the broken button text */
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(74, 95, 240, 0.15);
+}
+
+@media (max-width: 1150px) {
+  .dash-grid { grid-template-columns: 1fr; }
+}

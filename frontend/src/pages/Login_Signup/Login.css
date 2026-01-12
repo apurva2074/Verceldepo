@@ -1,0 +1,58 @@
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a4dbc, #3a8edb);
+  font-family: 'Poppins', sans-serif;
+  height: calc(100vh - 80px);
+  margin-top: 0; 
+}
+
+.login-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.login-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.login-btn {
+  background-color: #1a4dbc;
+  border: none;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background-color: #163d99;
+}
+
+.signup-link {
+  color: #1a4dbc;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}

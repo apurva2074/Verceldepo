@@ -1,0 +1,12 @@
+/* General styling for the home page */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9f7f6;
+}
+
+/* Add spacing between sections */
+.home-page > * {
+  margin-bottom: 30px;
+}
