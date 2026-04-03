@@ -8,7 +8,7 @@ body {
 .rentit-header {
   background-color: #FFFFFF; 
   box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
-  padding: 20px 40px;
+  padding: 15px 20px;
   margin-bottom: 0;
 }
 
@@ -25,7 +25,9 @@ body {
   font-weight: 500;
   color: #3B3B3B !important;
   transition: color 0.3s ease;
+  padding: 8px 12px;
 }
+
 .rentit-nav .nav-link::after {
   content: "";
   position: absolute;
@@ -63,6 +65,7 @@ body {
   border-color: #1a4dbc;
   transform: translateY(-1px);
 }
+
 .userbutton{
   font-weight: 600;
   font-size: 15px;
@@ -73,6 +76,7 @@ body {
   color: #F9F7F6; /* light text */
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .rentit-cta-btn {
   font-weight: 600;
   font-size: 15px;
@@ -83,15 +87,137 @@ body {
   color: #F9F7F6; /* light text */
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .lougoutbtn{
   background-color: #1a4dbc;
   color: #F9F7F6; /* light text */
   border-color: #1a4dbc;
   transform: translateY(-1px);
 }
+
 .rentit-cta-btn:hover {
   background-color: #1a4dbc; /* slightly darker teal on hover */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(26, 58, 188, 0.3);
+}
+
+/* Responsive Design */
+
+/* Tablet and below */
+@media (max-width: 992px) {
+  .rentit-header {
+    padding: 12px 16px;
+  }
+  
+  .rentit-nav .nav-link {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+  
+  .rentit-logo {
+    height: 35px;
+  }
+  
+  .rentit-login-btn,
+  .rentit-cta-btn,
+  .userbutton,
+  .lougoutbtn {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .rentit-header {
+    padding: 10px 12px;
+  }
+  
+  .rentit-logo {
+    height: 30px;
+  }
+  
+  .rentit-nav {
+    order: 3;
+    width: 100%;
+    margin-top: 10px;
+    justify-content: center !important;
+  }
+  
+  .rentit-nav .nav-link {
+    font-size: 13px;
+    padding: 4px 8px;
+    text-align: center;
+  }
+  
+  .rentit-login-btn,
+  .rentit-cta-btn,
+  .userbutton,
+  .lougoutbtn {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+  
+  .d-inline-flex.align-items-center.gap-2 {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 576px) {
+  .rentit-header {
+    padding: 8px 10px;
+  }
+  
+  .rentit-logo {
+    height: 28px;
+  }
+  
+  .rentit-nav .nav-link {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .rentit-login-btn,
+  .rentit-cta-btn,
+  .userbutton,
+  .lougoutbtn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .col-md-3.text-end {
+    text-align: center !important;
+  }
+  
+  .d-inline-flex.align-items-center.gap-2 {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 400px) {
+  .rentit-header {
+    padding: 6px 8px;
+  }
+  
+  .rentit-logo {
+    height: 24px;
+  }
+  
+  .rentit-nav .nav-link {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  .rentit-login-btn,
+  .rentit-cta-btn,
+  .userbutton,
+  .lougoutbtn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
 }
 

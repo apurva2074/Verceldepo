@@ -11,7 +11,7 @@ export default function Topbar({ userEmail="", onSearch=()=>{}, viewMode, setVie
       <div className="left">
         <form onSubmit={onSubmit} className="search-form">
           <input placeholder="Search by title or address..." value={q} onChange={(e)=>setQ(e.target.value)} />
-          <button className="search-btn" type="submit">🔍</button>
+          <button className="search-btn" type="submit">Search</button>
         </form>
 
         <div className="controls">

@@ -1,0 +1,1893 @@
+/* Tenant Dashboard Styles */
+
+/* Refresh Button */
+.refresh-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.refresh-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* Rental Property Overview Section */
+.rental-overview-section {
+  margin-bottom: 32px;
+}
+
+.rental-overview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.property-overview {
+  margin-bottom: 24px;
+}
+
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.property-header h3 {
+  margin: 0;
+  color: #1a202c;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.agreement-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.agreement-status.active {
+  background: #10b981;
+  color: white;
+}
+
+.agreement-status.expired {
+  background: #ef4444;
+  color: white;
+}
+
+.agreement-status.pending {
+  background: #f59e0b;
+  color: white;
+}
+
+.property-info-grid,
+.owner-info-grid,
+.rental-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: #1a202c;
+  font-weight: 400;
+}
+
+.info-value.rent-amount {
+  font-weight: 600;
+  color: #059669;
+  font-size: 1.1rem;
+}
+
+.info-value.rent-status {
+  font-weight: 500;
+}
+
+.info-value.rent-status.paid {
+  color: #059669;
+}
+
+.info-value.rent-status.pending {
+  color: #d97706;
+}
+
+.owner-overview,
+.rental-details {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.owner-overview h4,
+.rental-details h4 {
+  margin: 0 0 16px 0;
+  color: #1a202c;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.rental-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.rental-actions .action-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rental-actions .action-btn.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.rental-actions .action-btn.primary:hover {
+  background: #2563eb;
+}
+
+.rental-actions .action-btn.secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.rental-actions .action-btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+/* Rental Agreement Section */
+.rental-agreement-section {
+  margin-bottom: 32px;
+}
+
+.agreement-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.agreement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.agreement-title h3 {
+  margin: 0 0 8px 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.agreement-status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.agreement-status-badge.active {
+  background: #10b981;
+  color: white;
+}
+
+.agreement-status-badge.expired {
+  background: #ef4444;
+  color: white;
+}
+
+.agreement-status-badge.pending {
+  background: #f59e0b;
+  color: white;
+}
+
+.download-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-btn:hover {
+  background: #2563eb;
+}
+
+.agreement-details {
+  margin-bottom: 24px;
+}
+
+.agreement-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.agreement-terms {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.agreement-terms h4 {
+  margin: 0 0 12px 0;
+  color: #1a202c;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.terms-content {
+  color: #475569;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.terms-content p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.agreement-timeline {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.agreement-timeline h4 {
+  margin: 0 0 20px 0;
+  color: #1a202c;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 24px;
+  width: 2px;
+  height: calc(100% + 20px);
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: 3px solid white;
+  flex-shrink: 0;
+  margin-top: 4px;
+  z-index: 1;
+  position: relative;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: #10b981;
+}
+
+.timeline-item.active .timeline-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.timeline-item.pending .timeline-dot {
+  background: #e2e8f0;
+}
+
+.timeline-content h5 {
+  margin: 0 0 4px 0;
+  color: #1a202c;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.timeline-item.active .timeline-content h5 {
+  color: #3b82f6;
+}
+
+.timeline-item.completed .timeline-content h5 {
+  color: #10b981;
+}
+
+.timeline-item.pending .timeline-content h5 {
+  color: #94a3b8;
+}
+
+.timeline-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+/* Upcoming Rent Reminder Section */
+.upcoming-rent-reminder {
+  margin-bottom: 32px;
+}
+
+.reminder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reminder-header h2 {
+  margin: 0;
+  color: #1a202c;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.reminder-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.reminder-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.reminder-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.rent-amount,
+.rent-due,
+.rent-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.amount-label,
+.due-label,
+.status-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.amount-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.due-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.status-value {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.status-value.upcoming {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-value.overdue {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-value.no_agreement {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.status-value.up_to_date {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.reminder-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pay-rent-btn,
+.view-details-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+
+.pay-rent-btn.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.pay-rent-btn.primary:hover {
+  background: #2563eb;
+}
+
+.view-details-btn.secondary {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.view-details-btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+/* Payment Progress Styles */
+.payment-progress {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-header span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.progress-percentage {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.paid-amount {
+  color: #059669;
+  font-weight: 500;
+}
+
+.pending-amount {
+  color: #d97706;
+  font-weight: 500;
+}
+
+/* Rent Payment History Section */
+.payment-history-section {
+  margin-bottom: 32px;
+}
+
+.payment-summary-card,
+.security-deposit-card,
+.pending-payments-card,
+.past-payments-card,
+.no-payments-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.payment-summary-card h3,
+.security-deposit-card h3,
+.pending-payments-card h3,
+.past-payments-card h3 {
+  margin: 0 0 20px 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.summary-value.paid {
+  color: #059669;
+}
+
+.summary-value.pending {
+  color: #d97706;
+}
+
+.summary-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.summary-status.upcoming {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.summary-status.overdue {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.summary-status.no_agreement {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.summary-status.up_to_date {
+  background: #d1fae5;
+  color: #059669;
+}
+
+/* Security Deposit Styles */
+.deposit-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.deposit-amount,
+.deposit-status,
+.deposit-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.deposit-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.deposit-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.deposit-status-badge {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.deposit-status-badge.completed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.deposit-status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.deposit-status-badge.failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Payment List Styles */
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-item.pending {
+  background: #fffbeb;
+  border-color: #fbbf24;
+}
+
+.payment-item.completed {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info h4 {
+  margin: 0 0 4px 0;
+  color: #1a202c;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.payment-description {
+  margin: 0 0 8px 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.payment-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.payment-amount {
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 1rem;
+}
+
+.payment-due,
+.payment-date,
+.payment-method {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.payment-status-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.payment-status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.payment-status-badge.completed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.transaction-id {
+  margin: 4px 0 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.pay-now-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pay-now-btn:hover {
+  background: #2563eb;
+}
+
+/* No Payments State */
+.no-payments-content {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-payments-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.no-payments-content h3 {
+  margin: 0 0 8px 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.no-payments-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Rental Status Section (Legacy - kept for compatibility) */
+.rental-status-section {
+  margin-bottom: 32px;
+}
+
+.rental-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.rental-info h3 {
+  margin: 0 0 8px 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.rental-address {
+  color: #64748b;
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+}
+
+.rental-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.rent-amount {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.rent-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.rent-status.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rent-status.pending {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.due-date {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.pay-rent-btn {
+  background: linear-gradient(135deg, #1a4dbc, #3a8edb);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pay-rent-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 77, 188, 0.3);
+}
+
+/* Loading State */
+.tenant-dashboard-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a4dbc, #3a8edb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-overlay {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.12),
+    0 10px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 400px;
+  width: 90%;
+  animation: loadingSlideIn 0.6s ease-out;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #1a4dbc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Profile Edit Styles */
+.profile-section.editing {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b1b33;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1a4dbc;
+  box-shadow: 0 0 0 3px rgba(26, 77, 188, 0.1);
+}
+
+.form-group input.disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.form-group small {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: #1a4dbc;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1541a0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 77, 188, 0.3);
+}
+
+.btn-primary:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Profile Picture Styles */
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Profile Info Grid */
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 16px;
+}
+
+.profile-info-grid .info .label {
+  color: #7b8b9a;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.profile-info-grid .info .val {
+  color: #0b1b33;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+  
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Main Dashboard */
+.tenant-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8fafc;
+  min-height: calc(100vh - 80px);
+}
+
+/* Chat Section */
+.chat-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+/* Welcome Section */
+.dashboard-welcome {
+  background: linear-gradient(135deg, #1a4dbc, #2563eb);
+  color: white;
+  padding: 40px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.welcome-content h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.welcome-content p {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.welcome-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 120px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-number {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: #1a4dbc;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 77, 188, 0.3);
+}
+
+.action-btn.secondary {
+  background: white;
+  color: #1a4dbc;
+  border: 2px solid #1a4dbc;
+}
+
+.action-btn.secondary:hover {
+  background: #1a4dbc;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 77, 188, 0.3);
+}
+
+.action-icon {
+  font-size: 24px;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabs */
+.dashboard-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: #1a4dbc;
+  background: rgba(26, 77, 188, 0.05);
+}
+
+.tab-btn.active {
+  color: #1a4dbc;
+  border-bottom-color: #1a4dbc;
+  background: rgba(26, 77, 188, 0.05);
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 400px;
+}
+
+/* Properties Section */
+.properties-section h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 24px 0;
+}
+
+.properties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.property-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.property-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.property-image img,
+.property-image .no-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.property-image .no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.remove-wishlist {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-wishlist:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.property-info {
+  padding: 20px;
+}
+
+.property-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.property-info h3:hover {
+  color: #1a4dbc;
+}
+
+.property-address {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.property-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a4dbc;
+  margin: 0 0 12px 0;
+}
+
+.property-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.property-type,
+.property-tags span {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.property-type {
+  background: #dbeafe;
+  color: #065f46;
+}
+
+.property-tags span {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin: 0 0 24px 0;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary {
+  background: #1a4dbc;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #64748b;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #475569;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* Profile Section */
+.profile-section h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 24px 0;
+}
+
+.profile-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 600px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a4dbc, #2563eb);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.profile-info h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.profile-info p {
+  color: #64748b;
+  margin: 4px 0;
+}
+
+.profile-details {
+  margin-bottom: 32px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .tenant-dashboard {
+    padding: 16px;
+  }
+  
+  .dashboard-welcome {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+  
+  .welcome-stats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .tenant-dashboard {
+    padding: 12px;
+  }
+  
+  .dashboard-welcome {
+    padding: 24px;
+  }
+  
+  .welcome-content h1 {
+    font-size: 24px;
+  }
+  
+  .welcome-content p {
+    font-size: 16px;
+  }
+  
+  .welcome-stats {
+    gap: 16px;
+  }
+  
+  .stat-card {
+    min-width: 100px;
+    padding: 16px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .dashboard-tabs {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .properties-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .profile-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-welcome {
+    padding: 20px;
+  }
+  
+  .welcome-content h1 {
+    font-size: 20px;
+  }
+  
+  .welcome-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    min-width: auto;
+  }
+  
+  .action-btn {
+    padding: 16px;
+    font-size: 14px;
+  }
+  
+  .dashboard-content {
+    padding: 16px;
+  }
+  
+  .profile-card {
+    padding: 20px;
+  }
+  
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+}
+
+/* Empty States */
+.no-rented-property-section,
+.payment-history-section .empty-state-card {
+  margin-bottom: 32px;
+}
+
+.empty-state-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.empty-state-card:hover {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #fef7ff 0%, #faf5ff 100%);
+  transform: translateY(-2px);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
+  display: block;
+}
+
+.empty-state-card h3 {
+  color: #1e293b;
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.empty-state-card p {
+  color: #64748b;
+  margin-bottom: 32px;
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.secondary-btn {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.secondary-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Specific Empty State Variations */
+.no-rented-property-section .empty-state-card {
+  background: linear-gradient(135deg, #fef7ff 0%, #faf5ff 100%);
+  border-color: #a78bfa;
+}
+
+.no-rented-property-section .empty-icon {
+  color: #7c3aed;
+}
+
+.payment-history-section .empty-state-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #86efac;
+}
+
+.payment-history-section .empty-icon {
+  color: #16a34a;
+}
+
+/* Responsive Design for Empty States */
+@media (max-width: 768px) {
+  .empty-state-card {
+    padding: 32px 24px;
+    margin: 0 16px 24px 16px;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+  
+  .empty-state-card h3 {
+    font-size: 20px;
+  }
+  
+  .empty-state-card p {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  
+  .empty-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .empty-state-card {
+    padding: 24px 20px;
+    margin: 0 12px 20px 12px;
+  }
+  
+  .empty-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+  
+  .empty-state-card h3 {
+    font-size: 18px;
+  }
+  
+  .empty-state-card p {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+}

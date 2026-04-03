@@ -60,12 +60,42 @@
 
 /* CTA buttons */
 .cta-buttons .btn {
-  font-size: 1rem;
-  padding: 10px 20px;
-  border-radius: 6px;
+  font-size: 1.1rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.cta-buttons .btn:hover{
-  background-color: #163d99;
-  border-color: #163d99;
+.cta-buttons .btn-lg {
+  font-size: 1.2rem;
+  padding: 14px 28px;
+}
+
+.cta-buttons .btn-primary {
+  background-color: #1a4dbc;
+  border-color: #1a4dbc;
+  color: white;
+}
+
+.cta-buttons .btn-primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 35, 188, 0.3);
+}
+
+.cta-buttons .btn-outline-light {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.8);
+  color: white;
+}
+
+.cta-buttons .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
 }

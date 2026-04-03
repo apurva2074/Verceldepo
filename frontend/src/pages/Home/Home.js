@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../../MyComponent/Header";
 import Banner from "../../MyComponent/Banner";
+import Footer from "../../MyComponent/Footer";
 import "./Home.css";
 
 export default function Home() {
@@ -12,7 +13,8 @@ export default function Home() {
       {/* Banner Section */}
       <Banner />
 
-      {/* Future sections like Featured Properties, Footer can be added here */}
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

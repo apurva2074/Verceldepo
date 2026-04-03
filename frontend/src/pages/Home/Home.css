@@ -10,3 +10,40 @@
 .home-page > * {
   margin-bottom: 30px;
 }
+
+/* Responsive Design */
+
+/* Tablet and below */
+@media (max-width: 992px) {
+  .home-page > * {
+    margin-bottom: 25px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .home-page {
+    min-height: auto;
+  }
+  
+  .home-page > * {
+    margin-bottom: 20px;
+    padding: 0 15px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 576px) {
+  .home-page > * {
+    margin-bottom: 15px;
+    padding: 0 10px;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 400px) {
+  .home-page > * {
+    margin-bottom: 12px;
+    padding: 0 8px;
+  }
+}

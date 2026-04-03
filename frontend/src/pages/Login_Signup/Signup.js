@@ -69,6 +69,9 @@ export default function Signup() {
         { headers: { Authorization: `Bearer ${idToken}` } }
       );
 
+      // 4) Store user role in localStorage for immediate use
+      localStorage.setItem('userRole', role);
+
       setMsg(`Signup successful — ${role === "owner" ? "Owner" : "Tenant"} profile created!`);
       // Optional: redirect after a short delay
       setTimeout(() => navigate("/login"), 800);
@@ -101,116 +104,221 @@ export default function Signup() {
   return (
     <>
       <Header showAuthButtons={false} />
-      <div className="signup-container d-flex align-items-center justify-content-center">
-        <div className="signup-box">
-          <h2 className="signup-title">Create an Account</h2>
-          <p className="signup-subtitle">Join RentIt and start your journey</p>
-
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Full Name */}
-            <div className="mb-3">
-              <label className="form-label">Full Name</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
-                required
-              />
+      <div className="signup-container">
+        <div className="signup-wrapper">
+          <div className="signup-box">
+            <div className="signup-header">
+              <div className="signup-logo">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <h2 className="signup-title">Create Account</h2>
+              <p className="signup-subtitle">Join RentIt and start your journey</p>
             </div>
 
-            {/* Phone */}
-            <div className="mb-3">
-              <label className="form-label">Phone</label>
-              <input
-                type="tel"
-                className="form-control"
-                placeholder="Phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-                pattern="^[0-9+\-\s()]{6,}$"
-                title="Enter a valid phone number"
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="signup-form" noValidate>
+              {/* Full Name */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                  required
+                />
+              </div>
 
-            {/* Email */}
-            <div className="mb-3">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-              />
-            </div>
+              {/* Phone */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                  pattern="[0-9+\-\s()]{6,}"
+                  title="Enter a valid phone number"
+                />
+              </div>
 
-            {/* Password */}
-            <div className="mb-3">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Create a password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                required
-              />
-            </div>
+              {/* Email */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
 
-            {/* Confirm Password */}
-            <div className="mb-3">
-              <label className="form-label">Confirm Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Re-enter your password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                autoComplete="new-password"
-                required
-              />
-            </div>
+              {/* Password */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
 
-            {/* Role Selection */}
-            <div className="mb-3">
-              <label className="form-label">Select User Type</label>
-              <select
-                className="form-select"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
+              {/* Confirm Password */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Re-enter your password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              {/* Role Selection */}
+              <div className="form-group">
+                <label className="form-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                  </svg>
+                  I want to
+                </label>
+                <div className="role-selector">
+                  <div className={`role-option ${role === "owner" ? "active" : ""}`}>
+                    <input
+                      type="radio"
+                      id="owner"
+                      name="role"
+                      value="owner"
+                      checked={role === "owner"}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <label htmlFor="owner" className="role-label">
+                      <div className="role-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                      </div>
+                      <div className="role-content">
+                        <h4>Property Owner</h4>
+                        <p>List and manage your properties</p>
+                      </div>
+                    </label>
+                  </div>
+                  <div className={`role-option ${role === "tenant" ? "active" : ""}`}>
+                    <input
+                      type="radio"
+                      id="tenant"
+                      name="role"
+                      value="tenant"
+                      checked={role === "tenant"}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <label htmlFor="tenant" className="role-label">
+                      <div className="role-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="8.5" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                      <div className="role-content">
+                        <h4>Tenant</h4>
+                        <p>Find and rent your perfect home</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="signup-btn"
+                disabled={loading}
               >
-                <option value="">-- Select --</option>
-                <option value="owner">Owner</option>
-                <option value="tenant">Tenant</option>
-              </select>
+                {loading ? (
+                  <>
+                    <div className="btn-spinner"></div>
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    Create Account
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {msg && (
+              <div className={`message ${msg.includes("successful") ? "success" : "error"}`}>
+                {msg}
+              </div>
+            )}
+
+            <div className="signup-footer">
+              <p>
+                Already have an account?{" "}
+                <a href="/login" className="login-link">
+                  Sign In
+                </a>
+              </p>
+              <div className="terms-text">
+                By creating an account, you agree to our{" "}
+                <a href="/terms" className="terms-link">Terms of Service</a> and{" "}
+                <a href="/privacy" className="terms-link">Privacy Policy</a>
+              </div>
             </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary w-100 signup-btn"
-              disabled={loading}
-            >
-              {loading ? "Signing up..." : "Sign Up"}
-            </button>
-          </form>
-
-          {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
-
-          <div className="text-center mt-3">
-            <p>
-              Already have an account?{" "}
-              <a href="/login" className="login-link">
-                Login
-              </a>
-            </p>
           </div>
         </div>
       </div>

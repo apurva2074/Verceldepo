@@ -51,10 +51,16 @@ export default function Banner() {
         {/* CTA Buttons */}
         <div className="cta-buttons mt-4">
           <button
-            className="btn btn-outline-light me-2"
+            className="btn btn-primary btn-lg me-2"
             onClick={() => navigate("/listings")}
           >
             Browse Properties
+          </button>
+          <button
+            className="btn btn-outline-light btn-lg"
+            onClick={() => navigate("/login")}
+          >
+            List Your Property
           </button>
         </div>
       </div>

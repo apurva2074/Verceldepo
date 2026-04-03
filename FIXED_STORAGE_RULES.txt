@@ -1,0 +1,38 @@
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // PROPERTY IMAGES STORAGE
+    // Structure: properties/{ownerId}/{propertyId}/{imageName}
+    match /properties/{ownerId}/{propertyId}/{allPaths=**} {
+      // Read: Anyone can read property images (for approved properties)
+      allow read: if true;
+      
+      // Write: Only property owners can upload/update/delete their property images
+      allow write: if isOwner(ownerId);
+    }
+
+    // USER DOCUMENTS STORAGE
+    // Structure: userDocuments/{userId}/{fileName}
+    match /userDocuments/{userId}/{allPaths=**} {
+      // Read: Only users can read their own documents
+      allow read: if isOwner(userId);
+      
+      // Write: Only users can upload/update/delete their own documents
+      allow write: if isOwner(userId);
+    }
+
+    // DENY ALL OTHER ACCESS
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

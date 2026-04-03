@@ -20,9 +20,19 @@ export default function Header({ showAuthButtons = true }) {
         return;
       }
 
+      console.log('Header - Auth state changed:', u.email);
       setUser(u);
-      const fetchedRole = await fetchUserRole(u.uid);
-      setRole(fetchedRole);
+      
+      try {
+        if (u && u.uid) {
+          const fetchedRole = await fetchUserRole(u.uid);
+          console.log('Header - Fetched role:', fetchedRole);
+          setRole(fetchedRole);
+        }
+      } catch (error) {
+        console.error('Header - Error fetching role:', error);
+        setRole(null);
+      }
     });
 
     return () => unsub();
@@ -32,7 +42,20 @@ export default function Header({ showAuthButtons = true }) {
     if (role === "owner") {
       navigate("/owner/dashboard");
     } else if (role === "tenant") {
-      navigate("/tenant/dashboard");
+      navigate("/dashboard");
+    } else {
+      // Fallback: try to fetch role again
+      if (user && user.uid) {
+        fetchUserRole(user.uid).then(fetchedRole => {
+          if (fetchedRole === "owner") {
+            navigate("/owner/dashboard");
+          } else if (fetchedRole === "tenant") {
+            navigate("/dashboard");
+          }
+        }).catch(error => {
+          console.error('Header - Error fetching role on click:', error);
+        });
+      }
     }
   };
 

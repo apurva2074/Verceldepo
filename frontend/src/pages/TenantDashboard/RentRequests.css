@@ -1,0 +1,218 @@
+/* Add these styles to TenantDashboard.css */
+
+.rent-requests-section {
+  padding: 20px;
+}
+
+/* Pending Approval Notice inside tab content */
+.pending-approval-notice {
+  background: linear-gradient(135deg, #fff3cd, #ffe8a1);
+  border: 1px solid #ffc107;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notice-icon {
+  font-size: 24px;
+  animation: bounce 2s infinite;
+}
+
+.notice-content h3 {
+  margin: 0 0 4px 0;
+  color: #856404;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.notice-content p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-3px); }
+}
+
+/* Tab notification highlighting */
+.tab-btn.has-notification {
+  position: relative;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  border-color: #ff6b6b;
+  animation: pulse 2s infinite;
+}
+
+.tab-btn.has-notification:hover {
+  background: linear-gradient(135deg, #ff5252, #ff7979);
+  transform: translateY(-1px);
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+.rent-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rent-request-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #007bff;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.request-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.under_review {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.request-details {
+  margin-bottom: 15px;
+}
+
+.request-details p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.property-address {
+  font-weight: 500;
+}
+
+.rent-amount {
+  font-weight: 700;
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.submitted-date {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.request-documents {
+  margin-bottom: 15px;
+}
+
+.request-documents h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.documents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.document-item {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #495057;
+}
+
+.owner-message {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.owner-message h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.owner-message p {
+  margin: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.request-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .request-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .request-actions {
+    flex-direction: column;
+  }
+  
+  .request-actions button {
+    width: 100%;
+  }
+}

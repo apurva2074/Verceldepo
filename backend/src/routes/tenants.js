@@ -3,34 +3,15 @@
 // then app.use('/api/tenants', tenantsRouter);
 
 const express = require("express");
+const { requireRole } = require("../middleware/roleBasedAccess");
+const { verifyTokenMiddleware } = require("../middleware/auth");
 
 module.exports = ({ admin, db }) => {
   const router = express.Router();
 
-  // middleware: verify ID token from Authorization header
-  async function verifyTokenMiddleware(req, res, next) {
-    try {
-      const authHeader = req.headers.authorization || "";
-      if (!authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Missing or invalid Authorization header" });
-      }
-
-      const idToken = authHeader.split("Bearer ")[1].trim();
-      if (!idToken) return res.status(401).json({ message: "Missing ID token" });
-
-      // verify token using Admin SDK
-      const decoded = await admin.auth().verifyIdToken(idToken);
-      req.auth = decoded; // attach decoded token (contains uid, email, etc.)
-      next();
-    } catch (err) {
-      console.error("verifyTokenMiddleware error:", err);
-      return res.status(401).json({ message: "Unauthorized: token verification failed", error: err.message });
-    }
-  }
-
   // POST /api/tenants/profile
   // body: { name, phone, email? , other optional fields }
-  router.post("/profile", verifyTokenMiddleware, async (req, res) => {
+  router.post("/profile", verifyTokenMiddleware, requireRole('tenant'), async (req, res) => {
     try {
       const uid = req.auth.uid;
       // prefer email from token if not provided

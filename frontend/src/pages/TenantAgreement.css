@@ -1,0 +1,227 @@
+.tenant-agreement-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.agreement-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.agreement-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.agreement-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.agreement-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.agreement-id {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.agreement-content {
+  padding: 40px;
+}
+
+.property-details,
+.agreement-terms,
+.agreement-signature {
+  margin-bottom: 40px;
+}
+
+.property-details h2,
+.agreement-terms h2,
+.agreement-signature h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.detail-item span {
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.terms-content {
+  margin-top: 20px;
+}
+
+.terms-content h3 {
+  color: #555;
+  margin: 20px 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.terms-content p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.agreement-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.agreement-actions button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.agreement-loading,
+.agreement-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: white;
+}
+
+.agreement-loading .spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.agreement-error {
+  background: #dc3545;
+  color: white;
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 100px auto;
+}
+
+.agreement-error h2 {
+  margin-bottom: 15px;
+}
+
+.agreement-error button {
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .tenant-agreement-page {
+    padding: 10px;
+  }
+  
+  .agreement-container {
+    margin: 0;
+    border-radius: 8px;
+  }
+  
+  .agreement-header {
+    padding: 20px;
+  }
+  
+  .agreement-header h1 {
+    font-size: 2rem;
+  }
+  
+  .agreement-content {
+    padding: 20px;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .agreement-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .agreement-actions button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
