@@ -16,11 +16,27 @@
       "dest": "/backend/server.js"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/frontend/build/static/$1"
+      "src": "/static/js/(.*)",
+      "dest": "/frontend/build/static/js/$1"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|json))",
+      "src": "/static/css/(.*)",
+      "dest": "/frontend/build/static/css/$1"
+    },
+    {
+      "src": "/static/media/(.*)",
+      "dest": "/frontend/build/static/media/$1"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/frontend/build/manifest.json"
+    },
+    {
+      "src": "/robots.txt",
+      "dest": "/frontend/build/robots.txt"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|json|map))",
       "dest": "/frontend/build/$1"
     },
     {
