@@ -187,11 +187,13 @@ export default function TenantPaymentPage() {
         
         ...getRazorpayMethodConfig(),
         
-        prefill: {
-          name: user.displayName || "Tenant",
-          email: user.email || "",
-          contact: user.phoneNumber || ""
-        },
+        // Removed duplicate to fix build error - keeping the better version below
+        // prefill: {
+        //   name: user.displayName || "Tenant",
+        //   email: user.email || "",
+        //   contact: user.phoneNumber || ""
+        // },
+        
         notes: {
           bookingId: bookingId,
           type: "security_deposit"

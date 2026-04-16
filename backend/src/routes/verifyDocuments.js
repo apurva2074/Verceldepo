@@ -3,8 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { admin } = require('firebase-admin');
-const db = admin.firestore();
+const { admin, db } = require('../firebaseAdmin');
 const { verifyTokenMiddleware } = require('../middleware/auth');
 const DocumentVerificationService = require('../services/documentVerificationService');
 
@@ -65,13 +64,33 @@ router.post('/verify-document', verifyTokenMiddleware, upload.single('document')
     const filePath = req.file.path;
     const originalName = req.file.originalname;
 
-    console.log('🔍 AI VERIFICATION: Processing document for user:', userId);
-    console.log('🔍 AI VERIFICATION: File:', originalName);
+    console.log("Uploaded file:", req.file);
+    console.log('AI VERIFICATION: Processing document for user:', userId);
+    console.log('AI VERIFICATION: File:', originalName);
 
     // Verify document using AI service
     const verificationResult = await verificationService.verifyDocument(filePath);
 
-    console.log('🔍 AI VERIFICATION: Result:', verificationResult);
+    console.log('AI VERIFICATION: Result:', verificationResult);
+
+    // HARD BLOCK - Never save if AI verification fails
+    if (verificationResult.status !== 'Approved') {
+      console.log("BLOCKING SAVE - AI FAILED");
+      // Clean up uploaded file
+      try {
+        fs.unlinkSync(filePath);
+      } catch (cleanupError) {
+        console.error('Cleanup error:', cleanupError);
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Document verification failed',
+        aiStatus: verificationResult.status
+      });
+    }
+
+    console.log("SAVING DOCUMENT - AI PASSED");
 
     // Store verification result in Firestore
     const documentRecord = {
@@ -81,11 +100,19 @@ router.post('/verify-document', verifyTokenMiddleware, upload.single('document')
       status: verificationResult.status,
       message: verificationResult.message,
       verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-      fileSize: req.file.size,
-      mimeType: req.file.mimetype
+      fileSize: req.file && req.file.size ? req.file.size : 0,
+      mimeType: req.file && req.file.mimetype ? req.file.mimetype : "application/octet-stream"
     };
 
-    const docRef = await db.collection('documents').add(documentRecord);
+    // Safe object cleanup before saving
+    const cleanedData = Object.fromEntries(
+      Object.entries(documentRecord).filter(([_, v]) => v !== undefined)
+    );
+
+    // Log data before save
+    console.log("DATA BEFORE SAVE:", cleanedData);
+
+    const docRef = await db.collection('documents').add(cleanedData);
     
     console.log('🔍 AI VERIFICATION: Stored in Firestore with ID:', docRef.id);
 
@@ -146,7 +173,32 @@ router.post('/verify-multiple-documents', verifyTokenMiddleware, upload.array('d
     // Verify documents using AI service
     const verificationResults = await verificationService.verifyMultipleDocuments(filePaths);
 
-    console.log('🔍 AI VERIFICATION: Batch results:', verificationResults);
+    console.log('AI VERIFICATION: Batch results:', verificationResults);
+
+    // HARD BLOCK - Never save if ANY AI verification fails
+    const failedDocuments = verificationResults.filter(result => result.status !== 'Approved');
+    if (failedDocuments.length > 0) {
+      console.log("BLOCKING SAVE - AI FAILED for some documents");
+      console.log("Failed documents:", failedDocuments);
+      
+      // Clean up all uploaded files
+      for (const file of req.files) {
+        try {
+          fs.unlinkSync(file.path);
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Document verification failed for one or more documents',
+        failedCount: failedDocuments.length,
+        aiStatus: failedDocuments.map(f => f.status)
+      });
+    }
+
+    console.log("SAVING DOCUMENTS - AI PASSED FOR ALL");
 
     // Store verification results in Firestore
     const documentRecords = [];
@@ -162,11 +214,17 @@ router.post('/verify-multiple-documents', verifyTokenMiddleware, upload.array('d
         status: result.status,
         message: result.message,
         verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-        fileSize: file.size,
-        mimeType: file.mimetype
+        fileSize: file?.size || 0,
+        mimeType: file?.mimetype || "application/octet-stream"
       };
 
-      const docRef = await db.collection('documents').add(documentRecord);
+      console.log("DATA BEFORE SAVE:", documentRecord);
+
+      const cleanedData = Object.fromEntries(
+        Object.entries(documentRecord).filter(([_, v]) => v !== undefined)
+      );
+
+      const docRef = await db.collection('documents').add(cleanedData);
       documentRecords.push({
         documentId: docRef.id,
         fileName: file.originalname,

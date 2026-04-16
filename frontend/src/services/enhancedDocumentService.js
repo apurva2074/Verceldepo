@@ -3,6 +3,8 @@
  * Handles document upload with AI verification status tracking
  */
 
+import { getAuthToken } from '../utils/authToken';
+
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
 /**
@@ -66,34 +68,17 @@ export const getDocumentsStatus = async () => {
 };
 
 /**
- * Get authentication token
- * @returns {Promise<string>} - Auth token
- */
-const getAuthToken = async () => {
-  // This should be imported from your existing auth utilities
-  // For now, assuming it's available globally or via context
-  if (window.gapi && window.gapi.auth2) {
-    const user = window.gapi.auth2.getAuthInstance().currentUser.get();
-    return user.getAuthResponse().id_token;
-  }
-  
-  // Fallback for Firebase auth
-  if (window.firebase && window.firebase.auth) {
-    const user = window.firebase.auth().currentUser;
-    if (user) {
-      return await user.getIdToken();
-    }
-  }
-  
-  throw new Error('No authentication method available');
-};
-
-/**
  * Format verification status for display
  * @param {string} status - Verification status
+ * @param {Date|string|null} createdAt - Document creation timestamp (optional)
  * @returns {Object} - Formatted status with color, icon, and text
  */
-export const formatVerificationStatus = (status) => {
+export const formatVerificationStatus = (status, createdAt = null) => {
+  // Check if document is old (created more than 5 minutes ago)
+  const isOldDocument = createdAt && (
+    (typeof createdAt === 'string' ? new Date(createdAt) : createdAt)
+  ) < (new Date(Date.now() - 5 * 60 * 1000));
+
   switch (status) {
     case 'uploaded':
       return {
@@ -131,11 +116,12 @@ export const formatVerificationStatus = (status) => {
         text: 'Needs Manual Review'
       };
     case 'verification_failed':
+      // Show neutral message for old failed documents, error only for recent ones
       return {
-        color: '#dc3545',
-        bgColor: '#f8d7da',
-        icon: '🚫',
-        text: 'Verification System Error'
+        color: isOldDocument ? '#6c757d' : '#dc3545',
+        bgColor: isOldDocument ? '#f8f9fa' : '#f8d7da',
+        icon: isOldDocument ? '📄' : '🚫',
+        text: isOldDocument ? 'Previous verification failed' : 'Verification System Error'
       };
     default:
       return {
@@ -157,7 +143,7 @@ export const getStatusDescription = (status, reason) => {
   const formattedStatus = formatVerificationStatus(status);
   
   if (status === 'approved') {
-    return `${formattedStatus.text} - Document is valid and authentic`;
+    return formattedStatus.text;
   } else if (status === 'rejected') {
     return `${formattedStatus.text} - ${reason || 'Document could not be verified'}`;
   } else if (status === 'needs_review') {
@@ -174,6 +160,7 @@ export const getStatusDescription = (status, reason) => {
  * @param {string} status - Document status
  * @returns {boolean} - True if verification is complete
  */
+// Currently not used, kept for future feature expansion
 export const isVerificationComplete = (status) => {
   return ['approved', 'rejected', 'needs_review', 'verification_failed'].includes(status);
 };
@@ -183,6 +170,7 @@ export const isVerificationComplete = (status) => {
  * @param {string} status - Document status
  * @returns {boolean} - True if verification passed
  */
+// Currently not used, kept for future feature expansion
 export const isVerificationSuccessful = (status) => {
   return status === 'approved';
 };

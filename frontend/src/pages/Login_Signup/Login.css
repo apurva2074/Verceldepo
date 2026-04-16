@@ -213,6 +213,17 @@
   color: var(--primary);
 }
 
+.user-type-btn.error {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.user-type-btn.error:hover {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .user-type-btn.active {
   background: var(--primary);
   border-color: var(--primary);
@@ -301,6 +312,12 @@
   color: var(--danger);
   font-size: 12px;
   margin-top: 4px;
+  line-height: 1.4;
+}
+
+.error-message.role-error {
+  margin-top: 8px;
+  text-align: center;
   font-weight: 500;
 }
 

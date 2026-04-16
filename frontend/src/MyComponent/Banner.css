@@ -30,7 +30,7 @@
   color: #f0f0f0;
 }
 
-/* Search bar styling */
+/* Search bar styling with professional colors */
 .search-bar {
   background: #fff;
   padding: 10px;
@@ -47,18 +47,21 @@
 }
 
 .search-btn {
-  background-color: #1a4dbc;
+  background-color: #3b82f6;
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
   transition: 0.3s;
+  font-weight: 600;
 }
 
 .search-btn:hover {
-  background-color: #163d99;
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-/* CTA buttons */
+/* CTA buttons with professional colors */
 .cta-buttons .btn {
   font-size: 1.1rem;
   padding: 12px 24px;
@@ -75,8 +78,8 @@
 }
 
 .cta-buttons .btn-primary {
-  background-color: #1a4dbc;
-  border-color: #1a4dbc;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
   color: white;
 }
 
@@ -84,7 +87,7 @@
   background-color: #2563eb;
   border-color: #2563eb;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(26, 35, 188, 0.3);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
 .cta-buttons .btn-outline-light {

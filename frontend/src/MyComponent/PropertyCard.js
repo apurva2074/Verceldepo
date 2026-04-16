@@ -16,14 +16,12 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
   const user = auth.currentUser;
   const navigate = useNavigate();
   const [liked, setLiked] = useState(false);
-  const [wishlistLoading, setWishlistLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     if (!user || !p?.id) {
-      setWishlistLoading(false);
       return;
     }
     
@@ -35,7 +33,6 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
         setUserRole(role);
         if (role !== 'tenant') {
           console.log('PropertyCard: User is not tenant, skipping wishlist');
-          setWishlistLoading(false);
           return;
         }
         
@@ -46,7 +43,6 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
         
         if (!token) {
           console.log('PropertyCard: No valid token, skipping wishlist check');
-          setWishlistLoading(false);
           return;
         }
         
@@ -56,8 +52,6 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
       } catch (error) {
         console.log('Wishlist check failed:', error.message);
         setLiked(false);
-      } finally {
-        setWishlistLoading(false);
       }
     };
     
@@ -229,12 +223,10 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
           {/* WISHLIST */}
           {user && user.uid !== p.owner_uid && (
             <button
-              className={`pcard-like ${liked ? "active" : ""} ${wishlistLoading ? "loading" : ""}`}
+              className={`pcard-like ${liked ? "active" : ""}`}
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                if (wishlistLoading) return;
                 
                 try {
                   // Check if user is tenant before allowing wishlist action
@@ -264,11 +256,8 @@ export default function PropertyCard({ p, viewMode = "public", onDelete, layout 
                   setLiked(!liked);
                 }
               }}
-              disabled={wishlistLoading}
             >
-              {wishlistLoading ? (
-                <span className="loading-spinner">⟳</span>
-              ) : liked ? (
+              {liked ? (
                 <span className="heart-icon">❤️</span>
               ) : (
                 <span className="heart-icon">🤍</span>

@@ -3,7 +3,8 @@
 const express = require("express");
 const { verifyTokenMiddleware } = require("../middleware/auth");
 const { requireRole } = require("../middleware/roleBasedAccess");
-const { validate, schemas } = require("../middleware/validation");
+const { ErrorHandler } = require("../middleware/errorHandler");
+const { isPropertyAvailable, getOwnerId } = require("../utils/dataStandardization");
 
 module.exports = ({ admin, db }) => {
   const router = express.Router();
@@ -32,65 +33,76 @@ module.exports = ({ admin, db }) => {
         });
       }
 
-      // Get property document
+      // Get property reference for transaction
       const propertyRef = db.collection("properties").doc(propertyId);
-      const propertySnap = await propertyRef.get();
-      
-      if (!propertySnap.exists) {
-        return res.status(404).json({ message: "Property not found" });
-      }
 
-      const property = propertySnap.data();
-
-      // Check if property is available for rent
-      const bookableStatuses = ['ACTIVE', 'active', 'approved', 'available', 'Available'];
-      if (!bookableStatuses.includes(property.status)) {
-        return res.status(400).json({
-          message: 'Property is not available for rent',
-          currentStatus: property.status
-        });
-      }
-
-      // Check if booking already exists for this tenant and property
-      const existingBooking = await db.collection("bookings")
-        .where("propertyId", "==", propertyId)
-        .where("tenantId", "==", tenantId)
-        .where("status", "in", ["pending_payment", "pending", "confirmed", "active"])
-        .get();
-      
-      if (!existingBooking.empty) {
-        // Log existing booking details
-        const existingBookingData = existingBooking.docs[0].data();
-        console.log(`Existing booking found - tenantId: ${tenantId}, propertyId: ${propertyId}, status: ${existingBookingData.status}`);
+      // Use Firestore transaction to prevent race conditions
+      const result = await db.runTransaction(async (transaction) => {
+        // 1. Read property document within transaction
+        const propertyDoc = await transaction.get(propertyRef);
         
-        return res.status(400).json({ 
-          message: "Booking already exists for this property" 
+        if (!propertyDoc.exists) {
+          throw new Error("Property not found");
+        }
+        
+        const propertyData = propertyDoc.data();
+        
+        // 2. Check if property is still available
+        if (!isPropertyAvailable(propertyData.status)) {
+          throw new Error(`Property is not available for rent. Current status: ${propertyData.status}`);
+        }
+        
+        // 3. Check for ANY existing bookings for this property (prevent double booking)
+        const existingBookingsQuery = await transaction.get(
+          db.collection("bookings")
+            .where("propertyId", "==", propertyId)
+            .where("status", "in", ["pending_payment", "pending", "confirmed", "active"])
+            .limit(1)
+        );
+        
+        if (!existingBookingsQuery.empty) {
+          throw new Error("Property already booked by another user");
+        }
+        
+        // 4. Create booking document
+        const booking = {
+          propertyId,
+          tenantId,
+          ownerId: getOwnerId(propertyData), // Use standardized helper
+          agreementType,
+          rentAmount: Number(rentAmount),
+          securityDeposit: Number(securityDeposit || rentAmount * 2),
+          leaseDuration: Number(leaseDuration),
+          moveInDate,
+          status: 'pending_payment',
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const bookingRef = db.collection("bookings").doc();
+        transaction.set(bookingRef, booking);
+        const bookingId = bookingRef.id;
+        
+        // 5. Update property status to booked
+        transaction.update(propertyRef, {
+          status: 'booked',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
-      }
+        
+        console.log(`Booking created with ID: ${bookingId} and property status updated to 'booked'`);
+        
+        return {
+          bookingId,
+          booking,
+          property: propertyData
+        };
+      });
+      
+      const { bookingId, booking, property } = result;
 
-      // Create booking document
-      const booking = {
-        propertyId,
-        tenantId,
-        ownerId: property.owner_uid,
-        agreementType,
-        rentAmount: Number(rentAmount),
-        securityDeposit: Number(securityDeposit || rentAmount * 2),
-        leaseDuration: Number(leaseDuration),
-        moveInDate,
-        status: 'pending_payment',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      };
-
-      const bookingRef = await db.collection("bookings").add(booking);
-      const bookingId = bookingRef.id;
-
-      console.log(`Booking created with ID: ${bookingId}`);
-
-      // Create notification for property owner
+      // Create notification for property owner using data from transaction
       await db.collection("notifications").add({
-        userId: property.owner_uid,
+        userId: getOwnerId(property), // Use standardized helper
         type: 'new_booking',
         title: 'New Booking Request',
         message: `New booking request received for ${property.title}`,

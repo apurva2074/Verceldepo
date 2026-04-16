@@ -2,6 +2,7 @@
 
 const express = require("express");
 const { verifyTokenMiddleware } = require('../middleware/auth');
+const { getOwnerId, setOwnerId, standardizeStatus, isPropertyAvailable } = require('../utils/dataStandardization');
 
 module.exports = ({ admin, db }) => {
   const router = express.Router();
@@ -158,8 +159,8 @@ module.exports = ({ admin, db }) => {
       
       const property = propertySnap.data();
       
-      // Verify ownership
-      if (property.owner_uid !== owner_uid) {
+      // Verify ownership using helper (supports both ownerId and owner_uid)
+      if (getOwnerId(property) !== owner_uid) {
         return res.status(403).json({ 
           message: "Only property owner can upload photos" 
         });
@@ -207,8 +208,8 @@ module.exports = ({ admin, db }) => {
       
       const property = propertySnap.data();
       
-      // Verify ownership
-      if (property.owner_uid !== owner_uid) {
+      // Verify ownership using helper (supports both ownerId and owner_uid)
+      if (getOwnerId(property) !== owner_uid) {
         return res.status(403).json({ 
           message: "Only property owner can add media" 
         });
@@ -256,8 +257,8 @@ module.exports = ({ admin, db }) => {
       
       const property = propertySnap.data();
       
-      // Verify ownership
-      if (property.owner_uid !== owner_uid) {
+      // Verify ownership using helper (supports both ownerId and owner_uid)
+      if (getOwnerId(property) !== owner_uid) {
         return res.status(403).json({ 
           message: "Only property owner can update media" 
         });
@@ -346,8 +347,7 @@ module.exports = ({ admin, db }) => {
       }
 
       const propertyDoc = {
-        owner_uid,          // keep existing
-        ownerId: owner_uid, // ADD THIS — mirrors owner_uid for Firestore rules
+        ...setOwnerId({}, owner_uid), // Use helper to set both ownerId and owner_uid
         title,
         address: {
           line: address.line,
@@ -379,8 +379,8 @@ module.exports = ({ admin, db }) => {
         type: type || "apartment",
         pgGender: type === "pg" ? pgGender : null,
 
-        // 🔐 IMPORTANT: property starts as approved for demo (no admin)
-        status: "approved",
+        // Standardize status value
+        status: standardizeStatus("approved"),
         approved_at: admin.firestore.FieldValue.serverTimestamp(),
         created_at: admin.firestore.FieldValue.serverTimestamp(),
         updated_at: admin.firestore.FieldValue.serverTimestamp(),
@@ -436,8 +436,8 @@ module.exports = ({ admin, db }) => {
       
       const property = propertySnap.data();
       
-      // Verify ownership
-      if (property.owner_uid !== owner_uid) {
+      // Verify ownership using helper (supports both ownerId and owner_uid)
+      if (getOwnerId(property) !== owner_uid) {
         return res.status(403).json({ 
           message: "Only property owner can delete property" 
         });
@@ -482,7 +482,7 @@ module.exports = ({ admin, db }) => {
       }
 
       await propertyRef.update({
-        status: "approved",
+        status: standardizeStatus("approved"),
         approved_at: admin.firestore.FieldValue.serverTimestamp(),
       });
 

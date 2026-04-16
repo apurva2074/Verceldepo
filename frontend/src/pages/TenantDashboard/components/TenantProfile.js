@@ -402,7 +402,20 @@ export default function TenantProfile({ uid, fallbackEmail }) {
 
   return (
     <div className="profile-section">
-      <h2>My Profile</h2>
+      <div className="profile-header">
+        <h2>My Profile</h2>
+        <div className="profile-stats">
+          <div className="stat-badge success">
+            <span className="stat-icon">✓</span>
+            <span className="stat-text">Active Account</span>
+          </div>
+          <div className="stat-badge">
+            <span className="stat-icon">👤</span>
+            <span className="stat-text">Tenant</span>
+          </div>
+        </div>
+      </div>
+      
       <div className="profile-content">
         <div className="profile-card">
           <div className="profile-header">
@@ -410,60 +423,88 @@ export default function TenantProfile({ uid, fallbackEmail }) {
               {profile?.profilePicture ? (
                 <img src={profile.profilePicture} alt="Profile" className="profile-picture" />
               ) : (
-                (p.name?.[0] || "T").toUpperCase()
+                <div className="avatar-placeholder">
+                  {(p.name?.[0] || "T").toUpperCase()}
+                </div>
               )}
+              <div className="avatar-upload">
+                <label htmlFor="profile-upload" className="upload-btn">
+                  <span>📷</span>
+                </label>
+                <input
+                  id="profile-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureUpload}
+                  style={{ display: 'none' }}
+                />
+              </div>
             </div>
             <div className="profile-info">
               <h3>{p.name || "Tenant"}</h3>
-              <p>{p.email}</p>
-              {p.phone && <p>Phone: {p.phone}</p>}
+              <p className="email-display">{p.email}</p>
+              {p.phone && <p className="phone-display">📱 {p.phone}</p>}
             </div>
           </div>
           
           <div className="profile-details">
-            <div className="detail-item">
-              <span className="detail-label">Member Since:</span>
-              <span className="detail-value">
-                {profile?.created_at ? (profile.created_at.toDate ? new Date(profile.created_at.toDate()).toLocaleDateString() : new Date(profile.created_at).toLocaleDateString()) : 'Unknown'}
-              </span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Profile Completion:</span>
-              <span className="detail-value">{computed.percent}%</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Account Type:</span>
-              <span className="detail-value">Tenant</span>
-            </div>
-          </div>
-
-          <div className="profile-info-grid">
-            <div className="info">
-              <div className="label">Address</div>
-              <div className="val">
-                {typeof p.address === 'string' ? p.address : (p.address?.line || p.address?.line1 || "—")}
+            <div className="detail-card">
+              <h4>Account Information</h4>
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Member Since</span>
+                  <span className="detail-value">
+                    {profile?.created_at ? (profile.created_at.toDate ? new Date(profile.created_at.toDate()).toLocaleDateString() : new Date(profile.created_at).toLocaleDateString()) : 'Unknown'}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Profile Completion</span>
+                  <div className="completion-bar">
+                    <div className="completion-fill" style={{ width: `${computed.percent}%` }}></div>
+                    <span className="completion-text">{computed.percent}%</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="info">
-              <div className="label">City</div>
-              <div className="val">{p.city || "—"}</div>
-            </div>
-            <div className="info">
-              <div className="label">State</div>
-              <div className="val">{p.state || "—"}</div>
-            </div>
-            <div className="info">
-              <div className="label">PIN</div>
-              <div className="val">{p.pincode || "—"}</div>
+            
+            <div className="detail-card">
+              <h4>Contact Information</h4>
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Address</span>
+                  <span className="detail-value">
+                    {typeof p.address === 'string' ? p.address : (p.address?.line || p.address?.line1 || "Not provided")}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">City</span>
+                  <span className="detail-value">{p.city || "Not provided"}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">State</span>
+                  <span className="detail-value">{p.state || "Not provided"}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">PIN Code</span>
+                  <span className="detail-value">{p.pincode || "Not provided"}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="profile-actions">
-            <button className="btn-secondary" onClick={handleEditClick}>
+            <button className="btn-primary" onClick={handleEditClick}>
+              <span>✏️</span>
               Edit Profile
             </button>
-            <button className="btn-secondary">Change Password</button>
-            <button className="btn-danger">Sign Out</button>
+            <button className="btn-secondary">
+              <span>🔒</span>
+              Change Password
+            </button>
+            <button className="btn-danger">
+              <span>🚪</span>
+              Sign Out
+            </button>
           </div>
         </div>
       </div>

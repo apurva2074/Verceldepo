@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Header from "../../MyComponent/Header";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
-import { professionalLogin } from "../../utils/professionalAuth";
+import { professionalLogin, professionalLogout } from "../../utils/professionalAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -65,11 +65,13 @@ export default function Login() {
       setEmail(value);
     } else if (field === "password") {
       setPassword(value);
+    } else if (field === "userType") {
+      setUserType(value);
     }
     
     // Clear error for this field if user starts typing
     if (touched[field]) {
-      const error = validateField(field, value);
+      const error = validateField(field, field === "email" ? email : field === "password" ? password : userType);
       setErrors({ ...errors, [field]: error });
     }
   };
@@ -78,9 +80,15 @@ export default function Login() {
     const newErrors = {};
     newErrors.email = validateEmail(email);
     newErrors.password = validatePassword(password);
+    
+    // Add role validation
+    if (!userType || (userType !== "owner" && userType !== "tenant")) {
+      newErrors.userType = "Please select your account type";
+    }
+    
     setErrors(newErrors);
-    setTouched({ email: true, password: true });
-    return !newErrors.email && !newErrors.password;
+    setTouched({ email: true, password: true, userType: true });
+    return !newErrors.email && !newErrors.password && !newErrors.userType;
   };
 
   const friendlyFirebaseError = (code) => {
@@ -121,7 +129,7 @@ export default function Login() {
 
     try {
       // Use professional login with role verification
-      const result = await professionalLogin(email, password);
+      const result = await professionalLogin(email, password, userType);
       
       if (!result.success) {
         throw new Error(result.error || 'Login failed');
@@ -129,17 +137,14 @@ export default function Login() {
       
       console.log(`Professional login successful - Role: ${result.role}, Email: ${result.user.email}`);
       
-      // Check if user's actual role matches their selection (for UX feedback)
+      // Check if user's actual role matches their selection
       if (result.role !== userType) {
-        console.log(`Role mismatch - User selected: ${userType}, Actual role: ${result.role}`);
-        // Show helpful message but still redirect to correct dashboard
-        setMsg(`Note: You are logged in as ${result.role}. Redirecting to your dashboard...`);
-        
-        // Clear the message after 3 seconds
-        setTimeout(() => setMsg(""), 3000);
+        // Role mismatch - logout user and show error
+        await professionalLogout();
+        throw new Error(`Incorrect role selected. You selected "${userType}" but your account is registered as "${result.role}". Please select the correct role and try again.`);
       }
       
-      // Redirect based on verified role (not user selection)
+      // Redirect based on verified role
       if (result.role === "owner") {
         navigate("/owner/dashboard");
       } else if (result.role === "tenant") {
@@ -236,24 +241,33 @@ export default function Login() {
 
               {/* User Type Selection */}
               <div className="user-type-selector">
-                <label className="selector-label">I am a</label>
+                <label className="selector-label">I am a *</label>
                 <div className="user-type-options">
                   <button
                     type="button"
-                    className={`user-type-btn ${userType === "owner" ? "active" : ""}`}
-                    onClick={() => setUserType("owner")}
+                    className={`user-type-btn ${userType === "owner" ? "active" : ""} ${errors.userType ? 'error' : ''}`}
+                    onClick={() => {
+                      setUserType("owner");
+                      handleInputChange("userType", "owner");
+                    }}
                   >
                     Property Owner
                   </button>
                   <button
                     type="button"
-                    className={`user-type-btn ${userType === "tenant" ? "active" : ""}`}
-                    onClick={() => setUserType("tenant")}
+                    className={`user-type-btn ${userType === "tenant" ? "active" : ""} ${errors.userType ? 'error' : ''}`}
+                    onClick={() => {
+                      setUserType("tenant");
+                      handleInputChange("userType", "tenant");
+                    }}
                   >
                     Tenant
                   </button>
                 </div>
-                <small className="role-hint">Select your account type for better experience</small>
+                <small className="role-hint">Select your account type (required)</small>
+                {touched.userType && errors.userType && (
+                  <span className="error-message role-error">{errors.userType}</span>
+                )}
               </div>
 
               {/* Login Form */}

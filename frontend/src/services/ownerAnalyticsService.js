@@ -39,8 +39,33 @@ export const getOwnerAnalytics = async (timeRange = '30days') => {
   } catch (error) {
     console.error('Get owner analytics error:', error);
     
-    // Return mock data for development
-    return getMockAnalyticsData(timeRange);
+    // Return empty analytics data structure for development
+    return {
+      revenueOverview: {
+        totalRevenue: 0,
+        monthlyGrowth: 0,
+        yearlyGrowth: 0,
+        averageRent: 0
+      },
+      propertyPerformance: [],
+      occupancyMetrics: {
+        occupancyRate: 0,
+        totalProperties: 0,
+        occupiedProperties: 0,
+        vacantProperties: 0
+      },
+      tenantAnalytics: {
+        totalTenants: 0,
+        newTenantsThisMonth: 0,
+        averageTenancyDuration: 0,
+        tenantSatisfactionScore: 0
+      },
+      marketInsights: {
+        averageMarketRent: 0,
+        competitiveProperties: 0,
+        demandScore: 0
+      }
+    };
   }
 };
 
@@ -92,61 +117,4 @@ export const getMarketInsights = async (location) => {
     console.error('Get market insights error:', error);
     throw error;
   }
-};
-
-// Mock data for development
-const getMockAnalyticsData = (timeRange) => {
-  const multiplier = timeRange === '7days' ? 0.3 : timeRange === '90days' ? 3 : timeRange === '1year' ? 12 : 1;
-  
-  return {
-    revenueOverview: {
-      totalRevenue: Math.round(250000 * multiplier),
-      monthlyGrowth: 12.5,
-      yearlyGrowth: 28.3,
-      averageRent: 15000
-    },
-    propertyPerformance: [
-      {
-        id: 'prop1',
-        title: '2BHK Apartment in Koramangala',
-        address: 'Koramangala, Bangalore',
-        revenue: Math.round(18000 * multiplier),
-        occupancyRate: 95,
-        views: 245
-      },
-      {
-        id: 'prop2',
-        title: '3BHK Villa in Whitefield',
-        address: 'Whitefield, Bangalore',
-        revenue: Math.round(35000 * multiplier),
-        occupancyRate: 88,
-        views: 189
-      },
-      {
-        id: 'prop3',
-        title: '1BHK Studio in Indiranagar',
-        address: 'Indiranagar, Bangalore',
-        revenue: Math.round(12000 * multiplier),
-        occupancyRate: 92,
-        views: 156
-      }
-    ],
-    occupancyMetrics: {
-      occupancyRate: 91.7,
-      totalProperties: 8,
-      occupiedProperties: 7,
-      vacantProperties: 1
-    },
-    tenantAnalytics: {
-      totalTenants: 7,
-      newTenantsThisMonth: 2,
-      averageTenancyDuration: 18,
-      tenantSatisfactionScore: 4.6
-    },
-    marketInsights: {
-      averageMarketRent: 16000,
-      competitiveProperties: 124,
-      demandScore: 78
-    }
-  };
 };

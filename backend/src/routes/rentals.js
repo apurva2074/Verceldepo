@@ -4,7 +4,8 @@
 const express = require("express");
 const { verifyTokenMiddleware } = require("../middleware/auth");
 const { requireRole } = require("../middleware/roleBasedAccess");
-const { validate, schemas } = require("../middleware/validation");
+const { ErrorHandler } = require("../middleware/errorHandler");
+const { getOwnerId, setOwnerId, standardizeStatus, isPropertyAvailable } = require("../utils/dataStandardization");
 
 module.exports = ({ admin, db }) => {
   const router = express.Router();
@@ -60,7 +61,6 @@ module.exports = ({ admin, db }) => {
       // Validate required tenant profile fields before allowing rental request
       const hasRequiredProfile = !!(
         tenantData.fullName && 
-        tenantData.address && 
         tenantData.phone && 
         tenantData.idProofUrl
       );
@@ -94,12 +94,12 @@ module.exports = ({ admin, db }) => {
 
       const property = propertySnap.data();
 
-      // Check if property is available for rent
-      const bookableStatuses = ['ACTIVE', 'active', 'approved', 'available', 'Available'];
-      if (!bookableStatuses.includes(property.status)) {
+      // Check if property is available for rent using standardized helper
+      if (!isPropertyAvailable(property.status)) {
         return res.status(400).json({
           message: 'Property is not available for rent',
-          currentStatus: property.status
+          propertyStatus: property.status,
+          availableStatuses: ['ACTIVE', 'active', 'approved', 'available', 'Available']
         });
       }
 
@@ -136,7 +136,7 @@ module.exports = ({ admin, db }) => {
       const bookingData = {
         propertyId,
         tenantId,
-        ownerId: property.owner_uid,
+        ownerId: getOwnerId(property), // Use standardized helper
         tenantDetails: {
           fullName: tenantDetails.fullName,
           phone: tenantDetails.phone,
@@ -209,9 +209,9 @@ module.exports = ({ admin, db }) => {
       const agreementRef = await db.collection("agreements").add(agreementData);
       const agreementId = agreementRef.id;
 
-      // Create notification for owner
+      // Create notification for owner using standardized helper
       await db.collection("notifications").add({
-        userId: property.owner_uid,
+        userId: getOwnerId(property),
         type: 'new_rental_booking',
         title: 'New Rental Booking Request',
         message: `New rental booking request received for ${property.title}`,
@@ -222,14 +222,15 @@ module.exports = ({ admin, db }) => {
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      // Create or update chat between tenant and owner
-      const chatId = [tenantId, property.owner_uid].sort().join('_');
+      // Create or update chat between tenant and owner using standardized helper
+      const propertyOwnerId = getOwnerId(property);
+      const chatId = [tenantId, propertyOwnerId].sort().join('_');
       const chatRef = db.collection("chats").doc(chatId);
       
       await chatRef.set({
-        participants: [tenantId, property.owner_uid],
+        participants: [tenantId, propertyOwnerId],
         tenantId,
-        ownerId: property.owner_uid,
+        ownerId: propertyOwnerId,
         propertyId: propertyId,
         propertyTitle: property.title,
         lastMessage: {

@@ -7,6 +7,7 @@ const { requireRole } = require("../middleware/roleBasedAccess");
 const { verifyTokenMiddleware } = require("../middleware/auth");
 const { ErrorHandler } = require("../middleware/errorHandler");
 const { logWishlistActivity } = require("../utils/activityLogger");
+const { getWishlistCollection, getWishlistCollections } = require("../utils/dataStandardization");
 
 module.exports = ({ admin, db }) => {
   const router = express.Router();
@@ -29,8 +30,8 @@ module.exports = ({ admin, db }) => {
         return ErrorHandler.notFound(res, "Property");
       }
 
-      // Check if already in wishlist
-      const wishlistRef = db.collection("wishlists");
+      // Check if already in wishlist (try standard collection first)
+      const wishlistRef = db.collection(getWishlistCollection());
       const existingQuery = await wishlistRef
         .where("tenantId", "==", tenantId)
         .where("propertyId", "==", propertyId)
@@ -76,9 +77,18 @@ module.exports = ({ admin, db }) => {
     try {
       const tenantId = req.auth.uid;
 
-      const wishlistQuery = await db.collection("wishlists")
-        .where("tenantId", "==", tenantId)
-        .get();
+      // Try standard collection first, fallback to old one during transition
+      let wishlistQuery;
+      try {
+        wishlistQuery = await db.collection(getWishlistCollection())
+          .where("tenantId", "==", tenantId)
+          .get();
+      } catch (error) {
+        // Fallback to old collection name if standard doesn't exist
+        wishlistQuery = await db.collection("wishlists")
+          .where("tenantId", "==", tenantId)
+          .get();
+      }
 
       if (wishlistQuery.empty) {
         return res.json([]);
@@ -113,10 +123,20 @@ module.exports = ({ admin, db }) => {
       const tenantId = req.auth.uid;
       const { propertyId } = req.params;
 
-      const wishlistQuery = await db.collection("wishlists")
-        .where("tenantId", "==", tenantId)
-        .where("propertyId", "==", propertyId)
-        .get();
+      // Try standard collection first, fallback to old one during transition
+      let wishlistQuery;
+      try {
+        wishlistQuery = await db.collection(getWishlistCollection())
+          .where("tenantId", "==", tenantId)
+          .where("propertyId", "==", propertyId)
+          .get();
+      } catch (error) {
+        // Fallback to old collection name if standard doesn't exist
+        wishlistQuery = await db.collection("wishlists")
+          .where("tenantId", "==", tenantId)
+          .where("propertyId", "==", propertyId)
+          .get();
+      }
 
       return res.json({ inWishlist: !wishlistQuery.empty });
     } catch (err) {
@@ -131,16 +151,26 @@ module.exports = ({ admin, db }) => {
       const tenantId = req.auth.uid;
       const { propertyId } = req.params;
 
-      const wishlistQuery = await db.collection("wishlists")
-        .where("tenantId", "==", tenantId)
-        .where("propertyId", "==", propertyId)
-        .get();
+      // Try standard collection first, fallback to old one during transition
+      let wishlistQuery;
+      try {
+        wishlistQuery = await db.collection(getWishlistCollection())
+          .where("tenantId", "==", tenantId)
+          .where("propertyId", "==", propertyId)
+          .get();
+      } catch (error) {
+        // Fallback to old collection name if standard doesn't exist
+        wishlistQuery = await db.collection("wishlists")
+          .where("tenantId", "==", tenantId)
+          .where("propertyId", "==", propertyId)
+          .get();
+      }
 
       if (wishlistQuery.empty) {
         return ErrorHandler.notFound(res, "Property in wishlist");
       }
 
-      await db.collection("wishlists").doc(wishlistQuery.docs[0].id).delete();
+      await db.collection(getWishlistCollection()).doc(wishlistQuery.docs[0].id).delete();
       return res.json({ message: "Property removed from wishlist" });
     } catch (err) {
       console.error("delete wishlist error:", err);

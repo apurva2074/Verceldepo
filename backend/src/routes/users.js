@@ -1,6 +1,8 @@
 // backend/src/routes/users.js
 const express = require("express");
 const { verifyTokenMiddleware } = require("../middleware/auth");
+const logger = require('../utils/logger');
+const { getWishlistCollection } = require("../utils/dataStandardization");
 const { validate, schemas } = require("../middleware/validation");
 const { logActivity } = require("../utils/activityLogger");
 
@@ -415,8 +417,8 @@ module.exports = ({ admin, db }) => {
         }
 
         // 2. Get wishlist count
-        const wishlistQuery = await db.collection("wishlist")
-          .where("userId", "==", userId)
+        const wishlistQuery = await db.collection(getWishlistCollection())
+          .where("tenantId", "==", userId)
           .get();
         
         dashboardData.wishlistCount = wishlistQuery.size;

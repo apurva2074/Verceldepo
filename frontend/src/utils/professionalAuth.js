@@ -70,9 +70,10 @@ export const isAuthenticated = () => {
  * Professional login with role verification
  * @param {string} email 
  * @param {string} password 
+ * @param {string} selectedRole - Role selected by user ('owner' | 'tenant')
  * @returns {Promise<{success: boolean, user: any, role: string, error?: string}>}
  */
-export const professionalLogin = async (email, password) => {
+export const professionalLogin = async (email, password, selectedRole = null) => {
   try {
     const { signInWithEmailAndPassword } = await import('firebase/auth');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -110,7 +111,8 @@ export const professionalLogin = async (email, password) => {
       success: true,
       user: userCredential.user,
       role,
-      profile
+      profile,
+      selectedRole // Pass through for validation
     };
   } catch (error) {
     // Clean up on failure

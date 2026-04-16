@@ -3,8 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { admin } = require('firebase-admin');
-const db = admin.firestore();
+const { admin, db } = require('../firebaseAdmin');
 const { verifyTokenMiddleware } = require('../middleware/auth');
 const DocumentVerificationService = require('../services/documentVerificationService');
 
@@ -53,7 +52,10 @@ const verificationService = new DocumentVerificationService();
  */
 router.post('/upload-document-enhanced', verifyTokenMiddleware, upload.single('file'), async (req, res) => {
   try {
+    console.log("UPLOAD STARTED - Enhanced Tenant Upload");
+    
     if (!req.file) {
+      console.log("UPLOAD FAILED: No file provided");
       return res.status(400).json({
         success: false,
         message: 'No document file provided'
@@ -65,9 +67,10 @@ router.post('/upload-document-enhanced', verifyTokenMiddleware, upload.single('f
     const filePath = req.file.path;
     const originalName = req.file.originalname;
 
-    console.log('🔍 ENHANCED UPLOAD: Processing document for user:', userId);
-    console.log('🔍 ENHANCED UPLOAD: Document type:', documentType);
-    console.log('🔍 ENHANCED UPLOAD: File:', originalName);
+    console.log("FILE:", req.file);
+    console.log('ENHANCED UPLOAD: Processing document for user:', userId);
+    console.log('ENHANCED UPLOAD: Document type:', documentType);
+    console.log('ENHANCED UPLOAD: File:', originalName);
 
     // STEP 1: Store initial document record with "uploaded" status
     const documentRecord = {
@@ -79,91 +82,85 @@ router.post('/upload-document-enhanced', verifyTokenMiddleware, upload.single('f
       status: 'uploaded',
       reason: '',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      fileSize: req.file.size,
-      mimeType: req.file.mimeType
+      fileSize: req.file && req.file.size ? req.file.size : 0,
+      mimeType: req.file && req.file.mimetype ? req.file.mimetype : "application/octet-stream"
     };
 
-    const docRef = await db.collection('documents').add(documentRecord);
-    console.log('🔍 ENHANCED UPLOAD: Stored initial record with ID:', docRef.id);
+    // Safe object cleanup before saving - ADD ONLY THIS
+    const cleanedData = Object.fromEntries(
+      Object.entries(documentRecord).filter(([_, v]) => v !== undefined)
+    );
 
-    // STEP 2: Update status to "verifying" before AI call
-    await docRef.update({
-      status: 'verifying',
-      reason: 'AI verification in progress...'
+    // Log data before save - ADD ONLY THIS
+    console.log("DATA BEFORE SAVE:", cleanedData);
+
+    // STEP 2: Trigger AI verification BEFORE saving
+    console.log('AI VERIFICATION: Starting verification before save');
+    console.log("Running Python script...");
+    
+    // Verify document using AI service
+    const verificationResult = await verificationService.verifyDocument(filePath);
+    
+    console.log('AI VERIFICATION: Result:', verificationResult);
+    console.log("Python script execution completed.");
+
+    // STEP 3: Check verification result - only save if approved
+    if (verificationResult.status !== 'Approved') {
+      console.log("BLOCKING SAVE - AI FAILED");
+      console.log('AI VERIFICATION FAILED: Document not approved');
+      // Clean up uploaded file
+      if (req.file && req.file.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: 'Document verification failed',
+        aiStatus: verificationResult.status
+      });
+    }
+
+    // STEP 4: Save to Firestore only AFTER successful verification
+    console.log('AI VERIFICATION SUCCESS: Saving document to Firestore');
+    
+    // Update document record with verification result
+    cleanedData.status = 'approved';
+    cleanedData.reason = verificationResult.message || 'Document approved';
+    cleanedData.verifiedAt = admin.firestore.FieldValue.serverTimestamp();
+
+    // Wrap Firestore save with error handling - ADD ONLY THIS
+    let docRef;
+    try {
+      console.log("SAVING DOCUMENT - AI PASSED");
+      docRef = await db.collection('documents').add(cleanedData);
+      console.log("FIRESTORE SAVE SUCCESS: Document ID", docRef.id);
+    } catch (firestoreError) {
+      console.error("FIRESTORE ERROR:", firestoreError);
+      throw firestoreError;
+    }
+    console.log('ENHANCED UPLOAD: Document saved after verification with ID:', docRef.id);
+
+    // STEP 5: Update tenant's document record in their profile
+    await updateTenantDocumentRecord(userId, documentType, {
+      documentUrl: documentRecord.documentUrl,
+      verificationStatus: 'approved',
+      verificationReason: verificationResult.message || 'Document approved',
+      verifiedAt: new Date()
     });
 
-    console.log('🔍 ENHANCED UPLOAD: Status updated to "verifying"');
-
-    // STEP 3: Trigger AI verification asynchronously (non-blocking)
-    const triggerVerification = async () => {
-      try {
-        console.log('🔍 AI VERIFICATION: Starting for document:', docRef.id);
-        
-        // Verify document using AI service
-        const verificationResult = await verificationService.verifyDocument(filePath);
-        
-        console.log('🔍 AI VERIFICATION: Result:', verificationResult);
-
-        // STEP 4: Update status based on AI result
-        let finalStatus = 'needs_review';
-        let finalReason = verificationResult.message || 'Document processed';
-
-        if (verificationResult.status === 'Approved') {
-          finalStatus = 'approved';
-        } else if (verificationResult.status === 'Rejected') {
-          finalStatus = 'rejected';
-        } else if (verificationResult.status === 'Needs Review') {
-          finalStatus = 'needs_review';
-        }
-
-        await docRef.update({
-          status: finalStatus,
-          reason: finalReason,
-          verifiedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-
-        console.log('🔍 AI VERIFICATION: Final status updated:', finalStatus);
-
-        // Also update the tenant's document record in their profile
-        await updateTenantDocumentRecord(userId, documentType, {
-          documentUrl: documentRecord.documentUrl,
-          verificationStatus: finalStatus,
-          verificationReason: finalReason,
-          verifiedAt: new Date()
-        });
-
-      } catch (verificationError) {
-        console.error('🚨 AI VERIFICATION ERROR:', verificationError);
-        
-        // Update status to verification failed
-        await docRef.update({
-          status: 'verification_failed',
-          reason: verificationError.message || 'AI verification failed',
-          verifiedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-      }
-    };
-
-    // Start verification without blocking the response
-    triggerVerification();
-
-    // Clean up temp file after verification is queued
-    setTimeout(() => {
-      try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (cleanupError) {
-        console.error('🔍 ENHANCED UPLOAD: Cleanup error:', cleanupError);
-      }
-    }, 5000); // Give AI service time to process
+    console.log("UPLOAD COMPLETED - Enhanced Tenant Upload");
 
     res.json({
       success: true,
       documentId: docRef.id,
       documentUrl: documentRecord.documentUrl,
-      status: 'verifying',
-      message: 'Document uploaded successfully. AI verification in progress...',
+      status: 'approved',
+      message: 'Document uploaded and verified successfully',
+      verificationResult: verificationResult,
       uploadedAt: new Date().toISOString()
     });
 
@@ -216,6 +213,71 @@ router.get('/documents-status', verifyTokenMiddleware, async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch documents status'
+    });
+  }
+});
+
+/**
+ * DELETE /api/tenant/delete-document/:id
+ * Delete a document from Firestore and optionally from storage
+ */
+router.delete('/delete-document/:id', verifyTokenMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.auth.uid;
+
+    console.log('DELETE DOCUMENT: Deleting document:', id, 'for user:', userId);
+
+    // Get document to verify ownership and get file path
+    const docRef = db.collection('documents').doc(id);
+    const docSnapshot = await docRef.get();
+
+    if (!docSnapshot.exists) {
+      return res.status(404).json({
+        success: false,
+        message: 'Document not found'
+      });
+    }
+
+    const documentData = docSnapshot.data();
+
+    // Verify user owns this document
+    if (documentData.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete your own documents'
+      });
+    }
+
+    // Optional: Delete file from storage if filePath exists
+    if (documentData.filePath) {
+      try {
+        const fs = require('fs');
+        if (fs.existsSync(documentData.filePath)) {
+          fs.unlinkSync(documentData.filePath);
+          console.log('DELETE DOCUMENT: File deleted from storage:', documentData.filePath);
+        }
+      } catch (fileError) {
+        console.warn('DELETE DOCUMENT: Could not delete file from storage:', fileError.message);
+        // Continue with Firestore deletion even if file deletion fails
+      }
+    }
+
+    // Delete from Firestore
+    await docRef.delete();
+
+    console.log('DELETE DOCUMENT: Document deleted successfully:', id);
+
+    res.json({
+      success: true,
+      message: 'Document deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('DELETE DOCUMENT ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete document'
     });
   }
 });

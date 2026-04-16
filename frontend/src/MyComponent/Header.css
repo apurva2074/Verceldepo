@@ -1,7 +1,7 @@
 /* Body font */
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #F9F7F6; 
+  background-color: #f8fafc; 
 }
 
 /* Header */
@@ -47,23 +47,24 @@ body {
   width: 100%;
 }
 
-/* Login button */
+/* Login button - Professional colors */
 .rentit-login-btn {
   font-weight: 500;
   font-size: 15px;
   padding: 8px 16px;
   border-radius: 6px;
-  color: #2E2F3E; /* deep slate */
-  border: 1px solid #2E2F3E;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
   background-color: transparent;
   transition: all 0.3s ease;
 }
 
 .rentit-login-btn:hover {
-  background-color: #1a4dbc;
-  color: #F9F7F6; /* light text */
-  border-color: #1a4dbc;
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .userbutton{
@@ -71,10 +72,11 @@ body {
   font-size: 15px;
   padding: 8px 18px;
   border-radius: 6px;
-  background-color: #1a4dbc; /* ocean teal */
+  background-color: #3b82f6;
   border: none;
-  color: #F9F7F6; /* light text */
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .rentit-cta-btn {
@@ -82,23 +84,24 @@ body {
   font-size: 15px;
   padding: 8px 18px;
   border-radius: 6px;
-  background-color: #1a4dbc; /* ocean teal */
+  background-color: #3b82f6;
   border: none;
-  color: #F9F7F6; /* light text */
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .lougoutbtn{
-  background-color: #1a4dbc;
-  color: #F9F7F6; /* light text */
-  border-color: #1a4dbc;
-  transform: translateY(-1px);
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  background-color: transparent;
 }
 
-.rentit-cta-btn:hover {
-  background-color: #1a4dbc; /* slightly darker teal on hover */
+.rentit-cta-btn:hover,
+.userbutton:hover {
+  background-color: #2563eb;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(26, 58, 188, 0.3);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 /* Responsive Design */

@@ -443,7 +443,14 @@ export default function OwnerDashboard() {
             rentedProperties: 0,
             availableProperties: 0,
             totalMonthlyEarnings: 0,
-            properties: []
+            properties: [],
+            rentedPropertiesWithTenants: [],
+            earningsSummary: {
+              totalMonthlyEarnings: 0,
+              averageRentPerProperty: 0,
+              occupancyRate: 0
+            },
+            recentActivities: []
           });
           setProperties([]);
         }
@@ -451,6 +458,19 @@ export default function OwnerDashboard() {
         setLoading(false); // Also set main loading to false
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        setDashboardData({
+          totalProperties: 0,
+          rentedProperties: 0,
+          availableProperties: 0,
+          properties: [],
+          rentedPropertiesWithTenants: [],
+          earningsSummary: {
+            totalMonthlyEarnings: 0,
+            averageRentPerProperty: 0,
+            occupancyRate: 0
+          },
+          recentActivities: []
+        });
         setDashboardLoading(false);
         setLoading(false);
       }
@@ -566,11 +586,15 @@ export default function OwnerDashboard() {
         // Verify user is owner before accessing bank details
         if (ownerData.role === 'owner') {
           const bankDetailsData = ownerData.bankDetails;
-          console.log('🔍 Bank details found:', bankDetailsData);
+          console.log('Ë Bank details found:', bankDetailsData);
+          console.log('Ë Bank details type:', typeof bankDetailsData);
+          console.log('Ë Bank details is null:', bankDetailsData === null);
+          console.log('Ë Bank details is undefined:', bankDetailsData === undefined);
+          
           setBankDetails(bankDetailsData);
           
           if (bankDetailsData) {
-            console.log('🔍 Bank details keys:', Object.keys(bankDetailsData));
+            console.log('Ë Bank details keys:', Object.keys(bankDetailsData));
             setBankDetailsForm({
               accountHolderName: bankDetailsData.accountHolderName || '',
               bankName: bankDetailsData.bankName || '',
@@ -643,8 +667,11 @@ export default function OwnerDashboard() {
           setBankDetails(bankDetailsData);
           setIsEditingBankDetails(false);
           
-          alert('Bank details saved successfully!');
           console.log('✅ Bank details saved successfully');
+          console.log('✅ Bank details state after save:', bankDetailsData);
+          console.log('✅ Bank details state variable:', bankDetails);
+          
+          alert('Bank details saved successfully!');
         } else {
           console.log('🚨 User is not an owner, cannot save bank details');
           alert('Only owners can save bank details.');
@@ -1121,7 +1148,10 @@ export default function OwnerDashboard() {
       {/* Main Content */}
       <main className="dashboard-main">
         {/* Bank Details Warning Banner */}
-        {!bankDetailsLoading && !bankDetails && (
+        {(() => {
+          console.log('Ë Warning banner check:', { bankDetailsLoading, bankDetails });
+          return !bankDetailsLoading && !bankDetails;
+        })() && (
           <div className="warning-banner" style={{
             backgroundColor: '#fff3cd',
             border: '1px solid #ffeaa7',
@@ -1290,7 +1320,7 @@ export default function OwnerDashboard() {
               <h2>Rented Properties & Tenants</h2>
               <div className="section-info">
                 <span className="tenant-count">
-                  {dashboardLoading ? 'Loading...' : `${dashboardData.rentedPropertiesWithTenants.length} rented properties`}
+                  {dashboardLoading ? 'Loading...' : `${(dashboardData?.rentedPropertiesWithTenants || []).length} rented properties`}
                 </span>
               </div>
             </div>
@@ -1300,7 +1330,7 @@ export default function OwnerDashboard() {
                 <div className="spinner"></div>
                 <p>Loading tenant information...</p>
               </div>
-            ) : dashboardData.rentedPropertiesWithTenants.length === 0 ? (
+            ) : !dashboardData?.rentedPropertiesWithTenants || dashboardData.rentedPropertiesWithTenants.length === 0 ? (
               <div className="empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -1454,7 +1484,7 @@ export default function OwnerDashboard() {
                         <label>Account Holder Name *</label>
                         <input
                           type="text"
-                          value={bankDetailsForm.accountHolderName}
+                          value={bankDetailsForm.accountHolderName || user?.displayName || user?.email || ''}
                           onChange={(e) => handleBankDetailsInputChange('accountHolderName', e.target.value)}
                           placeholder="Enter account holder name"
                           required
@@ -1690,7 +1720,7 @@ export default function OwnerDashboard() {
                         <label>Account Holder Name *</label>
                         <input
                           type="text"
-                          value={bankDetailsForm.accountHolderName}
+                          value={bankDetailsForm.accountHolderName || user?.displayName || user?.email || ''}
                           onChange={(e) => handleBankDetailsInputChange('accountHolderName', e.target.value)}
                           placeholder="Enter account holder name"
                           required

@@ -4,10 +4,15 @@ import { getAuthToken } from '../../../utils/authToken';
 import { 
   uploadDocumentWithVerification, 
   getDocumentsStatus, 
+  // eslint-disable-next-line no-unused-vars
   formatVerificationStatus, 
+  // eslint-disable-next-line no-unused-vars
   getStatusDescription,
+  // eslint-disable-next-line no-unused-vars
   isVerificationComplete,
+  // eslint-disable-next-line no-unused-vars
   isVerificationSuccessful,
+  // eslint-disable-next-line no-unused-vars
   getStatusProgress
 } from '../../../services/enhancedDocumentService';
 import DocumentStatusDisplay from '../../../components/DocumentStatusDisplay';
@@ -44,6 +49,9 @@ export default function RentalDocuments({ uid }) {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  
+  // Document verification status tracking - ADD ONLY THIS
+  const [verificationStatus, setVerificationStatus] = useState('idle');
   
   // Document verification status tracking
   const [documentStatuses, setDocumentStatuses] = useState({
@@ -98,20 +106,44 @@ export default function RentalDocuments({ uid }) {
       
       if (response.success && response.documents) {
         const statuses = {};
+        let hasFailed = false;
+        let hasApproved = false;
         
         response.documents.forEach(doc => {
           if (doc.documentType === 'idProof') {
             statuses.idProof = doc;
+            if (doc.status === 'rejected' || doc.status === 'verification_failed') {
+              hasFailed = true;
+            } else if (doc.status === 'approved') {
+              hasApproved = true;
+            }
           } else if (doc.documentType === 'addressProof') {
             statuses.addressProof = doc;
+            if (doc.status === 'rejected' || doc.status === 'verification_failed') {
+              hasFailed = true;
+            } else if (doc.status === 'approved') {
+              hasApproved = true;
+            }
           }
         });
         
         setDocumentStatuses(statuses);
+        
+        // Update verification status based on results - ADD ONLY THIS
+        if (hasFailed) {
+          setVerificationStatus('failed');
+        } else if (hasApproved) {
+          // Enable save button when any document is approved
+          setVerificationStatus('success');
+        } else if (Object.keys(statuses).length > 0) {
+          setVerificationStatus('verifying');
+        }
+        
         console.log("Updated document statuses:", statuses);
       }
     } catch (error) {
       console.error('Error fetching document statuses:', error);
+      setVerificationStatus('failed');
     }
   }, [uid]);
 
@@ -154,7 +186,8 @@ export default function RentalDocuments({ uid }) {
         
         // Check if documents are already complete and user was redirected from rent button
         const returnToProperty = localStorage.getItem('returnToProperty');
-        const hasRequiredDocuments = !!(response.data.idProofUrl && response.data.addressProofUrl);
+        // Only require ID proof - address proof and emergency contact are optional
+        const hasRequiredDocuments = !!(response.data.idProofUrl);
         
         if (returnToProperty && hasRequiredDocuments) {
           // Documents are complete, redirect to rental agreement/payment
@@ -192,45 +225,106 @@ export default function RentalDocuments({ uid }) {
     setSuccess(false);
   };
 
+  // Handle document deletion - ADD ONLY THIS
+  const handleDeleteDocument = async (documentId, documentType) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm('Are you sure you want to delete this document?');
+    if (!confirmed) return;
+
+    try {
+      const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+      const response = await fetch(API_BASE + '/api/tenant/delete-document/' + documentId, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + await getAuthToken(),
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('Document deleted successfully:', documentId);
+        
+        // Clear the form data for the deleted document type
+        setFormData(prev => {
+          const newData = { ...prev };
+          newData[documentType + 'Url'] = '';
+          return newData;
+        });
+        
+        // Re-fetch document statuses to update UI
+        await fetchDocumentStatuses();
+        
+        // Re-fetch existing documents to update form
+        await fetchExistingDocuments();
+        
+        // Show success message
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        throw new Error(result.message || 'Failed to delete document');
+      }
+    } catch (error) {
+      console.error('Delete document error:', error);
+      setError(error.message);
+    }
+  };
+
   const handleFileUpload = async (fileType, file) => {
     if (!file) return;
 
     try {
-      // Show initial upload progress
+      // Show initial upload progress and set verifying status
       setUploadProgress(prev => ({ ...prev, [fileType]: 10 }));
+      setVerificationStatus('verifying');
       
-      console.log('🔍 ENHANCED UPLOAD: Uploading file:', file);
-      console.log('🔍 ENHANCED UPLOAD: FileType:', fileType);
-      console.log('🔍 ENHANCED UPLOAD: UID:', uid);
+      console.log('Uploading file:', file);
       
       // Use enhanced upload service with AI verification
       const result = await uploadDocumentWithVerification(file, fileType);
       
-      console.log('🔍 ENHANCED UPLOAD: Result:', result);
+      console.log('Upload result:', result);
 
-      // Update form data with document URL
-      setFormData(prev => ({ 
-        ...prev, 
-        [`${fileType}Url`]: result.documentUrl 
-      }));
-      
-      // Show "verifying" status
-      setUploadProgress(prev => ({ ...prev, [fileType]: 50 }));
-      
-      // Trigger immediate status fetch to show verification progress
-      fetchDocumentStatuses();
-      
-      // Show success message
-      setSuccess(true);
-      setError('');
-      
-      console.log('🔍 ENHANCED UPLOAD: Upload successful, AI verification started');
-      
+      // STEP 1: CHECK RESPONSE - Only update UI if backend confirms success
+      if (result.success === true) {
+        console.log('Upload successful, updating UI');
+
+        // Update form data with document URL ONLY after successful response
+        setFormData(prev => ({ 
+          ...prev, 
+          [fileType + 'Url']: result.documentUrl 
+        }));
+        
+        // Show "verifying" status
+        setUploadProgress(prev => ({ ...prev, [fileType]: 50 }));
+        
+        // Trigger immediate status fetch to show verification progress
+        fetchDocumentStatuses();
+        
+        // Show success message
+        setSuccess(true);
+        setError('');
+        
+        // Set verification status to success since AI verification passed
+        setVerificationStatus('success');
+        
+        // Reset upload progress
+        setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
+        
+        console.log('Upload successful, verification completed');
+      } else {
+        console.log('Upload failed, not updating UI:', result);
+        setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
+        setVerificationStatus('failed');
+        setError(result.message || 'Document upload failed');
+        return;
+      }
     } catch (error) {
-      console.error('🚨 ENHANCED UPLOAD ERROR:', error);
-      setError(`Failed to upload ${fileType === 'idProof' ? 'ID document' : 'address proof'}: ${error.message}`);
+      console.error('Upload error:', error);
       setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
-      setSuccess(false);
+      setVerificationStatus('failed');
+      setError(error.message || 'Document upload failed');
     }
   };
 
@@ -258,17 +352,17 @@ export default function RentalDocuments({ uid }) {
     try {
       setSaving(true);
       
-      console.log('Sending data to backend:', {
+      // Always send complete form state - this ensures single document update
+      const dataToSave = {
         ...formData,
         updatedAt: new Date().toISOString()
-      });
+      };
+      
+      console.log('Sending data to backend:', dataToSave);
       
       const response = await apiCall('/tenant/details', {
         method: 'POST',
-        body: JSON.stringify({
-          ...formData,
-          updatedAt: new Date().toISOString()
-        })
+        body: JSON.stringify(dataToSave)
       });
 
       console.log('Backend response:', response);
@@ -277,18 +371,19 @@ export default function RentalDocuments({ uid }) {
         setSuccess(true);
         setError('');
         
+        console.log('Tenant details updated successfully');
+        
         // Refresh the data to show updated values
         await fetchExistingDocuments();
         
-        // Check if user was redirected from a property and should return
-        const returnToProperty = localStorage.getItem('returnToProperty');
-        if (returnToProperty) {
-          localStorage.removeItem('returnToProperty');
-          setTimeout(() => {
-            navigate(`/property/${returnToProperty}`);
-          }, 2000);
+        // Simple redirect check - ADD ONLY THIS
+        const redirectPropertyId = localStorage.getItem("redirectAfterDocs");
+        if (redirectPropertyId) {
+          localStorage.removeItem("redirectAfterDocs");
+          navigate(`/property/${redirectPropertyId}`);
         }
         
+        // Normal success flow
         setTimeout(() => setSuccess(false), 3000);
       } else {
         throw new Error(response.message || 'Failed to save details');
@@ -331,9 +426,63 @@ export default function RentalDocuments({ uid }) {
         </div>
       )}
 
+      {verificationStatus === 'verifying' && (
+        <div style={{
+          backgroundColor: '#fef3c7',
+          border: '1px solid #f59e0b',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ color: '#d97706', fontSize: '16px' }}>!</span>
+          <span style={{ color: '#92400e', fontSize: '14px' }}>
+            File is being verified...
+          </span>
+        </div>
+      )}
+
+      {verificationStatus === 'success' && (
+        <div style={{
+          backgroundColor: '#d1fae5',
+          border: '1px solid #10b981',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ color: '#059669', fontSize: '16px' }}>!</span>
+          <span style={{ color: '#065f46', fontSize: '14px' }}>
+            Document verified successfully
+          </span>
+        </div>
+      )}
+
+      {verificationStatus === 'failed' && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          border: '1px solid #ef4444',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ color: '#dc2626', fontSize: '16px' }}>!</span>
+          <span style={{ color: '#991b1b', fontSize: '14px' }}>
+            Verification failed
+          </span>
+        </div>
+      )}
+
       {!loading && localStorage.getItem('returnToProperty') && !(formData.idProofUrl && formData.addressProofUrl) && (
         <div className="warning-message">
-          ⚠️ Please fill in all required documents before proceeding with your rental booking. This is required to complete your rental application.
+          Please fill in all required documents before proceeding with your rental booking. This is required to complete your rental application.
         </div>
       )}
 
@@ -445,9 +594,29 @@ export default function RentalDocuments({ uid }) {
                 documentType="idProof"
                 uploadProgress={uploadProgress.idProof}
               />
-              {formData.idProofUrl && !documentStatuses.idProof && (
-                <div className="uploaded-file">
-                  ✓ ID document uploaded
+              {documentStatuses.idProof && (
+                <div className="document-summary">
+                  {formatVerificationStatus(documentStatuses.idProof.status, documentStatuses.idProof.createdAt).icon} 
+                  {formatVerificationStatus(documentStatuses.idProof.status, documentStatuses.idProof.createdAt).text}
+                  {documentStatuses.idProof.reason && (
+                    <span className="status-reason">- {getStatusDescription(documentStatuses.idProof.status, documentStatuses.idProof.reason)}</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDocument(documentStatuses.idProof.documentId, 'idProof')}
+                    style={{
+                      marginLeft: '10px',
+                      padding: '4px 8px',
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               )}
             </div>
@@ -465,18 +634,68 @@ export default function RentalDocuments({ uid }) {
                 documentType="addressProof"
                 uploadProgress={uploadProgress.addressProof}
               />
-              {formData.addressProofUrl && !documentStatuses.addressProof && (
-                <div className="uploaded-file">
-                  ✓ Address proof uploaded
+              {documentStatuses.addressProof && (
+                <div className="document-summary">
+                  {formatVerificationStatus(documentStatuses.addressProof.status, documentStatuses.addressProof.createdAt).icon} 
+                  {formatVerificationStatus(documentStatuses.addressProof.status, documentStatuses.addressProof.createdAt).text}
+                  {documentStatuses.addressProof.reason && (
+                    <span className="status-reason">- {getStatusDescription(documentStatuses.addressProof.status, documentStatuses.addressProof.reason)}</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDocument(documentStatuses.addressProof.documentId, 'addressProof')}
+                    style={{
+                      marginLeft: '10px',
+                      padding: '4px 8px',
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
+          {formData.idProofUrl && formData.addressProofUrl && (
+            <div className="documents-overview">
+              <h4>📋 Document Verification Status</h4>
+              <div className="status-grid">
+                <div className="status-item">
+                  <span className="label">ID Proof:</span>
+                  {documentStatuses.idProof ? (
+                    <span className={`status ${documentStatuses.idProof.status}`}>
+                      {formatVerificationStatus(documentStatuses.idProof.status, documentStatuses.idProof.createdAt).icon} 
+                      {formatVerificationStatus(documentStatuses.idProof.status, documentStatuses.idProof.createdAt).text}
+                    </span>
+                  ) : (
+                    <span className="status pending">?? Pending Verification</span>
+                  )}
+                </div>
+                <div className="status-item">
+                  <span className="label">Address Proof:</span>
+                  {documentStatuses.addressProof ? (
+                    <span className={`status ${documentStatuses.addressProof.status}`}>
+                      {formatVerificationStatus(documentStatuses.addressProof.status, documentStatuses.addressProof.createdAt).icon} 
+                      {formatVerificationStatus(documentStatuses.addressProof.status, documentStatuses.addressProof.createdAt).text}
+                    </span>
+                  ) : (
+                    <span className="status pending">?? Pending Verification</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <button 
             type="submit" 
             className="submit-btn"
-            disabled={saving}
+            disabled={saving || verificationStatus !== 'success'}
           >
             {saving ? 'Saving...' : 'Save Documents'}
           </button>

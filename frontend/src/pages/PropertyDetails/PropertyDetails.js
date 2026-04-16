@@ -323,8 +323,16 @@ export default function PropertyDetails() {
     console.log("🔍 Current booking status:", rentRequestStatus);
     
     if (!user) {
-      console.log("🚨 No user found, redirecting to login");
+      console.log("No user found, redirecting to login");
       navigate('/login');
+      return;
+    }
+    
+    // Document verification check
+    if (!user.documents || user.documents.length === 0) {
+      alert("Please fill required documents before booking");
+      localStorage.setItem("redirectAfterDocs", id);
+      navigate('/dashboard?tab=rental-documents');
       return;
     }
     
@@ -338,18 +346,25 @@ export default function PropertyDetails() {
     
     // If tenant profile is incomplete
     try {
-      console.log("🔍 Checking tenant documents...");
+      console.log("Checking tenant documents for booking...");
       const documentCheck = await checkTenantDocuments(user.uid);
-      console.log("🔍 Document check result:", documentCheck);
+      console.log("Document check result:", documentCheck);
       
       if (!documentCheck.success || !documentCheck.data.hasRequiredDocuments) {
-        console.log("🚨 Profile incomplete - Navigate to documents");
-        localStorage.setItem('returnToProperty', id);
+        console.log("Documents incomplete - Block booking and redirect to documents");
+        
+        // Show warning message
+        alert("Please fill required documents before booking");
+        
+        // Save property ID for smart redirect after document completion
+        localStorage.setItem("redirectAfterDocs", id);
+        
+        // Redirect to documents tab
         navigate('/dashboard?tab=rental-documents');
         return;
       }
     } catch (error) {
-      console.error('🚨 Error checking documents:', error);
+      console.error('Error checking documents:', error);
       alert('Failed to check documents. Please try again.');
       return;
     }

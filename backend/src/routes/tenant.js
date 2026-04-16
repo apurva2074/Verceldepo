@@ -144,35 +144,28 @@ module.exports = ({ admin, db }) => {
 
       console.log(`Saving tenant details for: ${tenantId}`);
 
-      // Don't require all fields - save whatever is provided
-      if (!fullName && !dob && !phone && !address && !idType && !idProofUrl && !addressProofUrl) {
-        return res.status(400).json({
-          message: "No data provided to save"
-        });
-      }
-
-      // Only include fields that have values
+      // Always save/overwrite the tenant document - this ensures single source of truth
       const tenantData = {
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Always include these fields to ensure complete data
+        fullName: fullName || '',
+        dob: dob || '',
+        phone: phone || '',
+        address: address || '',
+        emergencyContactName: emergencyContactName || '',
+        emergencyContactPhone: emergencyContactPhone || '',
+        idType: idType || '',
+        idProofUrl: idProofUrl || '',
+        addressProofUrl: addressProofUrl || ''
       };
-      
-      // Add fields only if they have values
-      if (fullName) tenantData.fullName = fullName;
-      if (dob) tenantData.dob = dob;
-      if (phone) tenantData.phone = phone;
-      if (address) tenantData.address = address;
-      if (emergencyContactName) tenantData.emergencyContactName = emergencyContactName;
-      if (emergencyContactPhone) tenantData.emergencyContactPhone = emergencyContactPhone;
-      if (idType) tenantData.idType = idType;
-      if (idProofUrl) tenantData.idProofUrl = idProofUrl;
-      if (addressProofUrl) tenantData.addressProofUrl = addressProofUrl;
 
       console.log('Tenant data to save:', tenantData);
 
+      // Use set with merge to update existing document or create new one
       const tenantRef = db.collection("tenantDetails").doc(tenantId);
       await tenantRef.set(tenantData, { merge: true });
 
-      console.log(`Tenant details saved to Firestore for: ${tenantId}`);
+      console.log(`Tenant details saved/updated to Firestore for: ${tenantId}`);
       console.log('Document path:', tenantRef.path);
 
       return res.status(200).json({

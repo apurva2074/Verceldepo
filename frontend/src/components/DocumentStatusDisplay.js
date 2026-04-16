@@ -27,7 +27,7 @@ const DocumentStatusDisplay = ({ documentStatus, documentType, uploadProgress })
 
   // If we have document status, show verification status
   if (documentStatus) {
-    const status = formatVerificationStatus(documentStatus.status);
+    const status = formatVerificationStatus(documentStatus.status, documentStatus.createdAt);
     const progress = getStatusProgress(documentStatus.status);
     const description = getStatusDescription(documentStatus.status, documentStatus.reason);
 

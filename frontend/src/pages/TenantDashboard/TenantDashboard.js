@@ -7,6 +7,7 @@ import { getWishlist, removeFromWishlist } from "../../services/wishlistService"
 import { getUserDashboard } from "../../services/userDashboardService";
 import { testBackendConnection } from "../../services/userDashboardService";
 import { getAllProperties } from "../../services/propertiesService";
+import { checkTenantDocuments } from "../../services/tenantService";
 import TenantChat from "./components/TenantChat";
 import TenantProfile from "./components/TenantProfile";
 import RentalDocuments from "./components/RentalDocuments";
@@ -74,6 +75,12 @@ export default function TenantDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState(null);
+  
+  // Document completion status tracking - ADD ONLY THIS
+  const [documentStatus, setDocumentStatus] = useState({
+    hasDocuments: false,
+    isLoading: true
+  });
 
   // Authentication-aware navigation function
   const handleGenerateAgreement = (bookingId) => {
@@ -127,6 +134,7 @@ export default function TenantDashboard() {
   const [paymentHistory, setPaymentHistory] = useState(null);
   const [rentRequests, setRentRequests] = useState([]);
   const [activeTab, setActiveTab] = useState('wishlist');
+  const [rentedPropertyTab, setRentedPropertyTab] = useState('details');
   const [unreadNotifications, setUnreadNotifications] = useState({});
 
   // General notification tracking function
@@ -315,11 +323,66 @@ export default function TenantDashboard() {
       // Fetch user information via API
       try {
         const userResponse = await apiCall('/users/profile');
-        // Handle both direct and wrapped response formats
-        const userData = userResponse.data || userResponse;
-        setUserInfo(userData);
+        console.log('TenantDashboard - User profile received:', userResponse);
+        setUserInfo(userResponse);
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error('TenantDashboard - Error fetching user profile:', error);
+      }
+
+      // Check document completion status and show warning if needed
+      try {
+        const documentCheck = await checkTenantDocuments(user.uid);
+        
+        // Set document status for UI - ADD ONLY THIS
+        setDocumentStatus({
+          hasDocuments: documentCheck.success && documentCheck.data.hasRequiredDocuments,
+          isLoading: false
+        });
+        
+        if (!documentCheck.success || !documentCheck.data.hasRequiredDocuments) {
+          // Show warning toast/banner for incomplete documents
+          console.log('Documents incomplete, showing warning banner');
+          
+          // Create a simple toast notification
+          const toast = document.createElement('div');
+          toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f59e0b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 9999;
+            max-width: 400px;
+            font-size: 14px;
+            cursor: pointer;
+          `;
+          toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>!</span>
+              <span>Please fill required documents</span>
+            </div>
+          `;
+          
+          toast.onclick = () => {
+            navigate('/dashboard?tab=rental-documents');
+            document.body.removeChild(toast);
+          };
+          
+          document.body.appendChild(toast);
+          
+          // Auto-remove after 8 seconds
+          setTimeout(() => {
+            if (document.body.contains(toast)) {
+              document.body.removeChild(toast);
+            }
+          }, 8000);
+        }
+      } catch (error) {
+        console.error('Error checking document completion:', error);
+        // Don't show error to user, just log it
       }
 
       // Fetch wishlisted properties using API (now includes media from backend)
@@ -553,50 +616,69 @@ For official purposes, please contact the property owner.
           </div>
         </div>
 
-        {/* Dashboard Tabs - Moved up */}
+        {/* Dashboard Tabs - Professional Structure */}
         <div className="dashboard-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'wishlist' ? 'active' : ''}`}
-            onClick={() => setActiveTab('wishlist')}
-          >
-            <span>Heart</span>
-            Saved Properties ({dashboardData?.wishlistCount || wishlistedProperties.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'recent' ? 'active' : ''}`}
-            onClick={() => setActiveTab('recent')}
-          >
-            <span>Eye</span>
-            Recently Viewed ({recentlyViewed.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <span>User</span>
-            Profile
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'chat' ? 'active' : ''} ${unreadNotifications['chat'] ? 'has-notification' : ''}`}
-            onClick={() => handleTabClick('chat')}
-          >
-            <span>Chat</span>
-            Active Chats ({dashboardData?.activeChatsCount || 0})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'rent-requests' ? 'active' : ''} ${unreadNotifications['rent-requests'] ? 'has-notification' : ''}`}
-            onClick={() => handleTabClick('rent-requests')}
-          >
-            <span>Clipboard</span>
-            Rent Requests ({rentRequests.length})
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'rental-documents' ? 'active' : ''} ${unreadNotifications['rental-documents'] ? 'has-notification' : ''}`}
-            onClick={() => handleTabClick('rental-documents')}
-          >
-            <span>File</span>
-            Rental Documents
-          </button>
+          <div className="tabs-container">
+            <button 
+              className={`tab ${activeTab === 'wishlist' ? 'active' : ''}`}
+              onClick={() => setActiveTab('wishlist')}
+            >
+              Saved Properties ({dashboardData?.wishlistCount || wishlistedProperties.length})
+            </button>
+            <button 
+              className={`tab ${activeTab === 'recent' ? 'active' : ''}`}
+              onClick={() => setActiveTab('recent')}
+            >
+              Recently Viewed ({recentlyViewed.length})
+            </button>
+            <button 
+              className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              Profile
+            </button>
+            <button 
+              className={`tab ${activeTab === 'chat' ? 'active' : ''} ${unreadNotifications['chat'] ? 'has-notification' : ''}`}
+              onClick={() => handleTabClick('chat')}
+            >
+              Active Chats ({dashboardData?.activeChatsCount || 0})
+            </button>
+            <button 
+              className={`tab ${activeTab === 'rent-requests' ? 'active' : ''} ${unreadNotifications['rent-requests'] ? 'has-notification' : ''}`}
+              onClick={() => handleTabClick('rent-requests')}
+            >
+              Rent Requests ({rentRequests.length})
+            </button>
+            <button 
+              className={`tab ${activeTab === 'rented-property' ? 'active' : ''}`}
+              onClick={() => setActiveTab('rented-property')}
+            >
+              My Rental
+            </button>
+            <button 
+              className={`tab ${activeTab === 'rental-documents' ? 'active' : ''} ${unreadNotifications['rental-documents'] ? 'has-notification' : ''}`}
+              onClick={() => handleTabClick('rental-documents')}
+              style={!documentStatus.isLoading && !documentStatus.hasDocuments ? {
+                border: '2px solid #dc2626',
+                backgroundColor: activeTab === 'rental-documents' ? '#dc2626' : '#fef2f2',
+                color: activeTab === 'rental-documents' ? 'white' : '#dc2626'
+              } : {}}
+            >
+              Rental Documents
+              {!documentStatus.isLoading && !documentStatus.hasDocuments && (
+                <span style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  marginLeft: '4px'
+                }}>
+                  Required
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Tab Content */}
@@ -701,9 +783,511 @@ For official purposes, please contact the property owner.
             <TenantProfile uid={user.uid} fallbackEmail={user.email} />
           )}
 
+          {activeTab === 'rented-property' && (
+            <div className="rented-property-section">
+              {/* Rental Property Overview */}
+              {dashboardData?.rentedProperty ? (
+                <div className="rental-overview-section">
+                  <h2>Rented Property Overview</h2>
+                  
+                  {/* Rented Property Tabs */}
+                  <div className="rented-property-tabs">
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'details' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('details')}
+                    >
+                      Property Details
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'agreement' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('agreement')}
+                    >
+                      Rental Agreement
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'upcoming-rent' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('upcoming-rent')}
+                    >
+                      Upcoming Rent
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'payment-history' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('payment-history')}
+                    >
+                      Payment History
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'maintenance' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('maintenance')}
+                    >
+                      Maintenance
+                    </button>
+                  </div>
+
+                  <div className="rental-overview-card">
+                    {/* Property Details Tab */}
+                    {rentedPropertyTab === 'details' && (
+                      <div className="property-overview">
+                        <div className="property-header">
+                          <h3>{dashboardData.rentedProperty.title}</h3>
+                          <span className={`agreement-status ${dashboardData.agreementStatus}`}>
+                            {dashboardData.agreementStatus === 'active' ? 'Active' : 
+                               dashboardData.agreementStatus === 'expired' ? 'Expired' : 
+                               dashboardData.agreementStatus === 'pending' ? 'Pending' : 
+                               'Document ' + dashboardData.agreementStatus}
+                          </span>
+                        </div>
+                        
+                        <div className="property-info-grid">
+                          <div className="info-item">
+                            <span className="info-label">Address</span>
+                            <span className="info-value">
+                              {typeof dashboardData.rentedProperty.address === 'string' 
+                                ? dashboardData.rentedProperty.address 
+                                : `${dashboardData.rentedProperty.address?.line1 || ''}, ${dashboardData.rentedProperty.address?.city || ''}, ${dashboardData.rentedProperty.address?.state || ''} ${dashboardData.rentedProperty.address?.pincode || ''}`
+                              }
+                            </span>
+                          </div>
+                          
+                          <div className="info-item">
+                            <span className="info-label">Type</span>
+                            <span className="info-value">{dashboardData.rentedProperty.type}</span>
+                          </div>
+                          
+                          {dashboardData.rentedProperty.bedrooms && (
+                            <div className="info-item">
+                              <span className="info-label">Bedrooms</span>
+                              <span className="info-value">{dashboardData.rentedProperty.bedrooms} BHK</span>
+                            </div>
+                          )}
+                          
+                          <div className="info-item">
+                            <span className="info-label">Rent Start Date</span>
+                            <span className="info-value">
+                              {(() => {
+                                const startDate = dashboardData.rentStartDate;
+                                if (!startDate) return 'Not set';
+                                
+                                const dateObj = startDate.toDate ? startDate.toDate() : new Date(startDate);
+                                if (isNaN(dateObj.getTime())) return 'Invalid date';
+                                
+                                return dateObj.toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                });
+                              })()}
+                            </span>
+                          </div>
+                          
+                          {dashboardData.agreementStatus && (
+                            <div className="info-item">
+                              <span className="info-label">Status</span>
+                              <span className="info-value">{dashboardData.agreementStatus}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Rental Agreement Tab */}
+                    {rentedPropertyTab === 'agreement' && (
+                      <div className="rental-agreement-section">
+                        <h3>Rental Agreement</h3>
+                        <div className="agreement-card">
+                          <div className="agreement-header">
+                            <h4>Agreement Details</h4>
+                          </div>
+                          
+                          <div className="agreement-details">
+                            <div className="agreement-item">
+                              <span className="agreement-label">Agreement ID:</span>
+                              <span className="agreement-value">{dashboardData.agreementDetails.agreementId}</span>
+                            </div>
+                            <div className="agreement-item">
+                              <span className="agreement-label">Property:</span>
+                              <span className="agreement-value">{dashboardData?.rentedProperty?.title || 'N/A'}</span>
+                            </div>
+                            <div className="agreement-item">
+                              <span className="agreement-label">Owner:</span>
+                              <span className="agreement-value">{dashboardData?.ownerDetails?.name || 'N/A'}</span>
+                            </div>
+                            <div className="agreement-item">
+                              <span className="agreement-label">Agreement Period:</span>
+                              <span className="agreement-value">{formatDate(dashboardData.agreementDetails.startDate)} - {formatDate(dashboardData.agreementDetails.endDate)}</span>
+                            </div>
+                            <div className="agreement-item">
+                              <span className="agreement-label">Monthly Rent:</span>
+                              <span className="agreement-value">Rs{dashboardData.agreementDetails.monthlyRent?.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="agreement-item">
+                              <span className="agreement-label">Security Deposit:</span>
+                              <span className="agreement-value">Rs{dashboardData.agreementDetails.securityDeposit?.toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Upcoming Rent Reminder Tab */}
+                    {rentedPropertyTab === 'upcoming-rent' && (
+                      <div className="upcoming-rent-section">
+                        <h3>Upcoming Rent Reminder</h3>
+                        <div className="rent-reminder-card">
+                          <div className="reminder-header">
+                            <div className="reminder-icon">Rs</div>
+                            <div className="reminder-info">
+                              <h4>Next Rent Payment Due</h4>
+                              <p className="due-date">
+                                {(() => {
+                                  const nextDueDate = dashboardData?.nextRentDueDate;
+                                  if (!nextDueDate) return 'No due date available';
+                                  
+                                  const dateObj = nextDueDate.toDate ? nextDueDate.toDate() : new Date(nextDueDate);
+                                  if (isNaN(dateObj.getTime())) return 'Invalid date';
+                                  
+                                  const daysUntilDue = Math.ceil((dateObj - new Date()) / (1000 * 60 * 60 * 24));
+                                  const isOverdue = daysUntilDue < 0;
+                                  const isDueSoon = daysUntilDue <= 7 && daysUntilDue > 0;
+                                  
+                                  return (
+                                    <span className={`due-status ${isOverdue ? 'overdue' : isDueSoon ? 'due-soon' : 'normal'}`}>
+                                      {dateObj.toLocaleDateString('en-US', { 
+                                        month: 'long', 
+                                        day: 'numeric', 
+                                        year: 'numeric' 
+                                      })}
+                                      {isOverdue && <span className="overdue-badge">OVERDUE</span>}
+                                      {isDueSoon && <span className="due-soon-badge">Due Soon</span>}
+                                    </span>
+                                  );
+                                })()}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="rent-details">
+                            <div className="rent-amount">
+                              <span className="amount-label">Monthly Rent:</span>
+                              <span className="amount-value">Rs{dashboardData?.rentAmount?.toLocaleString('en-IN') || '0'}</span>
+                            </div>
+                            
+                            <div className="rent-status">
+                              <span className="status-label">Payment Status:</span>
+                              <span className={`status-value ${dashboardData?.rentStatus || 'pending'}`}>
+                                {dashboardData?.rentStatus === 'paid' ? 'Paid' : 
+                                 dashboardData?.rentStatus === 'pending' ? 'Pending' : 
+                                 dashboardData?.rentStatus || 'Pending'}
+                              </span>
+                            </div>
+                            
+                            <div className="payment-methods">
+                              <span className="methods-label">Payment Methods:</span>
+                              <div className="methods-list">
+                                <button className="payment-method-btn primary" onClick={() => navigate(`/rent-payment/${dashboardData.rentedProperty.id}`)}>
+                                  Pay Now
+                                </button>
+                                <button className="payment-method-btn secondary">
+                                  Schedule Payment
+                                </button>
+                                <button className="payment-method-btn secondary">
+                                  View Payment Options
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="reminder-actions">
+                            <div className="notification-settings">
+                              <h5>Payment Reminders</h5>
+                              <div className="reminder-options">
+                                <label className="reminder-option">
+                                  <input type="checkbox" defaultChecked />
+                                  <span>Email reminder 3 days before due</span>
+                                </label>
+                                <label className="reminder-option">
+                                  <input type="checkbox" defaultChecked />
+                                  <span>Email reminder 1 day before due</span>
+                                </label>
+                                <label className="reminder-option">
+                                  <input type="checkbox" />
+                                  <span>SMS reminder on due date</span>
+                                </label>
+                              </div>
+                            </div>
+                            
+                            <div className="payment-history-link">
+                              <button className="link-btn" onClick={() => setRentedPropertyTab('payment-history')}>
+                                View Full Payment History
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Payment History Tab */}
+                    {rentedPropertyTab === 'payment-history' && (
+                      <div className="payment-history-section">
+                        <h3>Payment History</h3>
+                        <div className="payment-summary">
+                          <div className="summary-card">
+                            <div className="summary-item">
+                              <span className="summary-label">Total Paid:</span>
+                              <span className="summary-value paid">Rs{(paymentHistory?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0).toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="summary-item">
+                              <span className="summary-label">Payments Made:</span>
+                              <span className="summary-value">{paymentHistory?.length || 0} payments</span>
+                            </div>
+                            <div className="summary-item">
+                              <span className="summary-label">Next Payment:</span>
+                              <span className="summary-value upcoming">Rs{dashboardData?.rentAmount?.toLocaleString('en-IN') || '0'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {paymentHistory && paymentHistory.length > 0 ? (
+                          <div className="payment-list">
+                            <div className="payment-list-header">
+                              <h4>Recent Payments</h4>
+                              <div className="filter-options">
+                                <select className="payment-filter">
+                                  <option value="all">All Payments</option>
+                                  <option value="completed">Completed</option>
+                                  <option value="pending">Pending</option>
+                                  <option value="failed">Failed</option>
+                                </select>
+                              </div>
+                            </div>
+                            
+                            {paymentHistory.map((payment, index) => (
+                              <div key={index} className="payment-item">
+                                <div className="payment-header">
+                                  <div className="payment-date-info">
+                                    <span className="payment-date">{new Date(payment.date).toLocaleDateString('en-US', { 
+                                      month: 'short', 
+                                      day: 'numeric', 
+                                      year: 'numeric' 
+                                    })}</span>
+                                    <span className="payment-time">{new Date(payment.date).toLocaleTimeString('en-US', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}</span>
+                                  </div>
+                                  <span className={`payment-status ${payment.status}`}>
+                                    {payment.status === 'completed' ? 'Paid' : 
+                                     payment.status === 'pending' ? 'Pending' : 
+                                     payment.status === 'failed' ? 'Failed' : 
+                                     payment.status}
+                                  </span>
+                                </div>
+                                
+                                <div className="payment-details">
+                                  <div className="payment-amount-info">
+                                    <div className="payment-amount">Rs{payment.amount?.toLocaleString('en-IN')}</div>
+                                    <div className="payment-period">{payment.period || 'Monthly Rent'}</div>
+                                  </div>
+                                  
+                                  <div className="payment-method-info">
+                                    <div className="payment-method">{payment.method || 'Online Payment'}</div>
+                                    <div className="payment-id">ID: {payment.transactionId || payment.id || 'N/A'}</div>
+                                  </div>
+                                  
+                                  <div className="payment-actions">
+                                    {payment.status === 'pending' && (
+                                      <button className="action-btn primary">Complete Payment</button>
+                                    )}
+                                    {payment.status === 'completed' && (
+                                      <button className="action-btn secondary">Download Receipt</button>
+                                    )}
+                                    {payment.status === 'failed' && (
+                                      <button className="action-btn danger">Retry Payment</button>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {payment.notes && (
+                                  <div className="payment-notes">
+                                    <span className="notes-label">Notes:</span>
+                                    <span className="notes-text">{payment.notes}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="empty-state-card">
+                            <div className="empty-icon">Rs</div>
+                            <h3>No payment history</h3>
+                            <p>Your payment history will appear here once you make rent payments.</p>
+                            <button className="primary-btn" onClick={() => navigate(`/rent-payment/${dashboardData.rentedProperty.id}`)}>
+                              Make First Payment
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Maintenance Tab */}
+                    {rentedPropertyTab === 'maintenance' && (
+                      <div className="maintenance-section">
+                        <h3>Maintenance Requests</h3>
+                        <div className="maintenance-card">
+                          <div className="empty-state">
+                            <div className="empty-icon">Rs</div>
+                            <h4>No maintenance requests</h4>
+                            <p>If you have any maintenance issues with your rented property, you can submit them here.</p>
+                            <button className="primary-btn">
+                              Request Maintenance
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons - Always Visible */}
+                    <div className="rental-actions">
+                      <button className="action-btn primary" onClick={() => navigate(`/rent-payment/${dashboardData.rentedProperty.id}`)}>
+                        Pay Rent
+                      </button>
+                      <button className="action-btn secondary" onClick={() => navigate(`/property/${dashboardData.rentedProperty.id}`)}>
+                        View Property
+                      </button>
+                      <button className="action-btn secondary" onClick={() => navigate(`/chat/new/${dashboardData.ownerDetails?.uid}`)}>
+                        Contact Owner
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="no-rented-property-section">
+                  <h2>My Rental</h2>
+                  
+                  {/* Rented Property Tabs - Always Visible */}
+                  <div className="rented-property-tabs">
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'details' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('details')}
+                    >
+                      Property Details
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'agreement' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('agreement')}
+                    >
+                      Rental Agreement
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'upcoming-rent' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('upcoming-rent')}
+                    >
+                      Upcoming Rent
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'payment-history' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('payment-history')}
+                    >
+                      Payment History
+                    </button>
+                    <button 
+                      className={`rented-tab ${rentedPropertyTab === 'maintenance' ? 'active' : ''}`}
+                      onClick={() => setRentedPropertyTab('maintenance')}
+                    >
+                      Maintenance
+                    </button>
+                  </div>
+
+                  {/* Empty State Content */}
+                  <div className="rental-overview-card">
+                    {rentedPropertyTab === 'details' && (
+                      <div className="empty-state-card">
+                        <div className="empty-icon">House</div>
+                        <h3>No rented property yet</h3>
+                        <p>Start your rental journey by browsing available properties and connecting with owners.</p>
+                        <div className="empty-actions">
+                          <button className="primary-btn" onClick={() => navigate('/listings')}>
+                            Browse Properties
+                          </button>
+                          <button className="secondary-btn" onClick={() => navigate('/wishlist')}>
+                            View Wishlist
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {rentedPropertyTab === 'agreement' && (
+                      <div className="empty-state-card">
+                        <div className="empty-icon">Rs</div>
+                        <h3>No rental agreement</h3>
+                        <p>You need to have an active rental agreement to view agreement details.</p>
+                        <button className="primary-btn" onClick={() => navigate('/listings')}>
+                          Find Properties
+                        </button>
+                      </div>
+                    )}
+                    
+                    {rentedPropertyTab === 'upcoming-rent' && (
+                      <div className="empty-state-card">
+                        <div className="empty-icon">Rs</div>
+                        <h3>No upcoming rent</h3>
+                        <p>You don't have any upcoming rent payments. Once you rent a property, you'll see payment reminders here.</p>
+                        <button className="primary-btn" onClick={() => navigate('/listings')}>
+                          Find Properties to Rent
+                        </button>
+                      </div>
+                    )}
+                    
+                    {rentedPropertyTab === 'payment-history' && (
+                      <div className="empty-state-card">
+                        <div className="empty-icon">Rs</div>
+                        <h3>No payment history</h3>
+                        <p>Your payment history will appear here once you make rent payments for your rented property.</p>
+                        <button className="primary-btn" onClick={() => navigate('/listings')}>
+                          Find Properties to Rent
+                        </button>
+                      </div>
+                    )}
+                    
+                    {rentedPropertyTab === 'maintenance' && (
+                      <div className="empty-state-card">
+                        <div className="empty-icon">Rs</div>
+                        <h3>No maintenance requests</h3>
+                        <p>Maintenance requests will appear here once you have a rented property and submit requests.</p>
+                        <button className="primary-btn" onClick={() => navigate('/listings')}>
+                          Find Properties to Rent
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'rental-documents' && user && user.uid && (
             <>
               {console.log("Rental Documents tab activated for user:", user.uid)}
+              
+              {/* Warning banner for incomplete documents - ADD ONLY THIS */}
+              {!documentStatus.isLoading && !documentStatus.hasDocuments && (
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #f59e0b',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{ color: '#d97706', fontSize: '16px' }}>!</span>
+                  <span style={{ color: '#92400e', fontSize: '14px' }}>
+                    Please complete your documents to continue booking properties
+                  </span>
+                </div>
+              )}
+              
               <RentalDocuments uid={user.uid} />
             </>
           )}
@@ -861,106 +1445,6 @@ For official purposes, please contact the property owner.
             </div>
           )}
         </div>
-
-        {/* Rental Property Overview */}
-        {dashboardData?.rentedProperty ? (
-          <div className="rental-overview-section">
-            <h2>Rented Property Overview</h2>
-            <div className="rental-overview-card">
-              {/* Property Details */}
-              <div className="property-overview">
-                <div className="property-header">
-                  <h3>{dashboardData.rentedProperty.title}</h3>
-                  <span className={`agreement-status ${dashboardData.agreementStatus}`}>
-                    {dashboardData.agreementStatus === 'active' ? 'Active' : 
-                     dashboardData.agreementStatus === 'expired' ? 'Expired' : 
-                     dashboardData.agreementStatus === 'pending' ? 'Pending' : 
-                     'Document ' + dashboardData.agreementStatus}
-                  </span>
-                </div>
-                
-                <div className="property-info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Address</span>
-                    <span className="info-value">
-                      {typeof dashboardData.rentedProperty.address === 'string' 
-                        ? dashboardData.rentedProperty.address 
-                        : `${dashboardData.rentedProperty.address?.line1 || ''}, ${dashboardData.rentedProperty.address?.city || ''}, ${dashboardData.rentedProperty.address?.state || ''} ${dashboardData.rentedProperty.address?.pincode || ''}`
-                      }
-                    </span>
-                  </div>
-                  
-                  <div className="info-item">
-                    <span className="info-label">Type</span>
-                    <span className="info-value">{dashboardData.rentedProperty.type}</span>
-                  </div>
-                  
-                  {dashboardData.rentedProperty.bedrooms && (
-                    <div className="info-item">
-                      <span className="info-label">Bedrooms</span>
-                      <span className="info-value">{dashboardData.rentedProperty.bedrooms} BHK</span>
-                    </div>
-                  )}
-                  
-                  <div className="info-item">
-                    <span className="info-label">Rent Start Date</span>
-                    <span className="info-value">
-                      {(() => {
-                        const startDate = dashboardData.rentStartDate;
-                        if (!startDate) return 'Not set';
-                        
-                        const dateObj = startDate.toDate ? startDate.toDate() : new Date(startDate);
-                        if (isNaN(dateObj.getTime())) return 'Invalid date';
-                        
-                        return dateObj.toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        });
-                      })()}
-                    </span>
-                  </div>
-                  
-                  {dashboardData.agreementStatus && (
-                    <div className="info-item">
-                      <span className="info-label">Status</span>
-                      <span className="info-value">{dashboardData.agreementStatus}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="rental-actions">
-                <button className="action-btn primary" onClick={() => navigate(`/rent-payment/${dashboardData.rentedProperty.id}`)}>
-                  Pay Rent
-                </button>
-                <button className="action-btn secondary" onClick={() => navigate(`/property/${dashboardData.rentedProperty.id}`)}>
-                  View Property
-                </button>
-                <button className="action-btn secondary" onClick={() => navigate(`/chat/new/${dashboardData.ownerDetails?.uid}`)}>
-                  Contact Owner
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="no-rented-property-section">
-            <div className="empty-state-card">
-              <div className="empty-icon">House</div>
-              <h3>No rented property yet</h3>
-              <p>Start your rental journey by browsing available properties and connecting with owners.</p>
-              <div className="empty-actions">
-                <button className="primary-btn" onClick={() => navigate('/listings')}>
-                  Browse Properties
-                </button>
-                <button className="secondary-btn" onClick={() => navigate('/wishlist')}>
-                  View Wishlist
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Rental Agreement Section */}
         {dashboardData?.agreementDetails && (
