@@ -1,32 +1,32 @@
 {
   "version": 2,
-  "outputDirectory": "frontend/build",
+  "outputDirectory": "build",
   "builds": [
     {
-      "src": "frontend/build",
+      "src": "build",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/frontend/build/static/$1"
+      "dest": "/build/static/$1"
     },
     {
       "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|json|map))",
-      "dest": "/frontend/build/$1"
+      "dest": "/build/$1"
     },
     {
       "src": "/manifest.json",
-      "dest": "/frontend/build/manifest.json"
+      "dest": "/build/manifest.json"
     },
     {
       "src": "/robots.txt",
-      "dest": "/frontend/build/robots.txt"
+      "dest": "/build/robots.txt"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/build/index.html"
+      "dest": "/build/index.html"
     }
   ]
 }
