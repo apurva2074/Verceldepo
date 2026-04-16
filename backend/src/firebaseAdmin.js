@@ -19,26 +19,24 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
   }
   
   // Decode base64 private key for environment variable deployment
-  let privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString();
+  const privateKeyBuffer = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64');
+  let privateKey = privateKeyBuffer.toString('utf8');
   
   console.log('Decoded private key length:', privateKey.length);
   console.log('Decoded private key starts with MIIE:', privateKey.startsWith('MIIE'));
   
-  // Remove any existing headers and clean up the key
-  privateKey = privateKey
-    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-    .replace(/-----END PRIVATE KEY-----/g, '')
-    .replace(/\s+/g, '')
-    .trim();
+  // Check if it already has headers
+  if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+    // Add headers if not present
+    privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
+  }
   
-  console.log('Cleaned private key length:', privateKey.length);
+  console.log('Final private key length:', privateKey.length);
+  console.log('Final private key starts correctly:', privateKey.startsWith('-----BEGIN PRIVATE KEY-----'));
+  console.log('Final private key ends correctly:', privateKey.endsWith('-----END PRIVATE KEY-----\n'));
   
-  // Ensure proper PEM formatting with correct newlines
-  const formattedPrivateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
-  
-  console.log('Formatted private key length:', formattedPrivateKey.length);
-  console.log('Formatted private key starts correctly:', formattedPrivateKey.startsWith('-----BEGIN PRIVATE KEY-----'));
-  console.log('Formatted private key ends correctly:', formattedPrivateKey.endsWith('-----END PRIVATE KEY-----\n'));
+  // Use the key as-is without further manipulation
+  const formattedPrivateKey = privateKey;
     
   serviceAccount = {
     project_id: process.env.FIREBASE_PROJECT_ID,
