@@ -11,12 +11,17 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
   }
   
   // Decode base64 private key for environment variable deployment
-  const privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString();
+  let privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString();
   
-  // Ensure proper PEM formatting
-  const formattedPrivateKey = privateKey.includes('-----BEGIN PRIVATE KEY-----') 
-    ? privateKey 
-    : `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
+  // Remove any existing headers and clean up the key
+  privateKey = privateKey
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\s+/g, '')
+    .trim();
+  
+  // Ensure proper PEM formatting with correct newlines
+  const formattedPrivateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
     
   serviceAccount = {
     project_id: process.env.FIREBASE_PROJECT_ID,
