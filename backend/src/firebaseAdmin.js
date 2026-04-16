@@ -29,9 +29,9 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
   if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
     // Add headers if not present with REAL line breaks
     privateKey = `-----BEGIN PRIVATE KEY-----
-${privateKey}
------END PRIVATE KEY-----
-`;
+    ${privateKey}
+    -----END PRIVATE KEY-----
+    `;
   }
   
   console.log('Final private key length:', privateKey.length);
