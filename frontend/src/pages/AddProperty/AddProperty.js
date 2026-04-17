@@ -109,6 +109,12 @@ export default function AddPropertyPage() {
   const [parkingCharge, setParkingCharge] = useState("");
   const [preferredTenants, setPreferredTenants] = useState("");
 
+  /* ================= RENT PREDICTION ================= */
+  const [predictedRent, setPredictedRent] = useState(null);
+  const [showPrediction, setShowPrediction] = useState(false);
+  const [predictionLoading, setPredictionLoading] = useState(false);
+  const [predictionError, setPredictionError] = useState("");
+
   /* ================= AMENITIES ================= */
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedNearby, setSelectedNearby] = useState([]);
@@ -350,6 +356,110 @@ export default function AddPropertyPage() {
         : [...prev, place]
     );
   }, []);
+
+  /* ================= RENT PREDICTION FUNCTION ================= */
+  const predictRent = useCallback(async () => {
+    // Check if we have enough data for prediction
+    if (!city || !bedrooms || !bathrooms || !squareFootage || !furnishing || !ptype) {
+      setPredictionError("Please fill in property details first (property type, bedrooms, bathrooms, square footage, furnishing, and location)");
+      return;
+    }
+
+    // Validate that all numeric values are valid numbers
+    if (isNaN(parseInt(bedrooms)) || isNaN(parseInt(bathrooms)) || isNaN(parseInt(squareFootage))) {
+      setPredictionError("Please enter valid numeric values for bedrooms, bathrooms, and square footage");
+      return;
+    }
+
+    // Only predict for Mumbai areas
+    const mumbaiAreas = ['mumbai', 'bombay', 'south mumbai', 'bandra', 'andheri', 'juhu', 'worli', 'powai', 'goregaon', 'borivali', 'kandivali', 'dahisar', 'mulund', 'thane', 'navi mumbai', 'vashi', 'nerul'];
+    const isMumbai = mumbaiAreas.some(area => city.toLowerCase().includes(area)) || 
+                     city.toLowerCase().includes('mumbai') || 
+                     city.toLowerCase().includes('bombay');
+    
+    if (!isMumbai) {
+      setPredictionError("Rent prediction is currently available only for Mumbai areas");
+      return;
+    }
+
+    setPredictionLoading(true);
+    setPredictionError("");
+    setPredictedRent(null);
+
+    try {
+      // Log current form state for debugging
+      console.log('=== Rent Prediction Input Data ===');
+      console.log('City:', city);
+      console.log('Property Type:', ptype);
+      console.log('Bedrooms:', bedrooms);
+      console.log('Bathrooms:', bathrooms);
+      console.log('Square Footage:', squareFootage);
+      console.log('Furnishing:', furnishing);
+      console.log('Property Age:', propertyAge);
+      console.log('Amenities Count:', selectedAmenities.length);
+      console.log('================================');
+
+      const requestData = {
+        area: city.trim(), // Use exact city input
+        propertyType: ptype, // Use exact property type from form
+        bedrooms: parseInt(bedrooms),
+        bathrooms: parseInt(bathrooms),
+        squareFootage: parseInt(squareFootage),
+        furnishing: furnishing,
+        propertyAge: propertyAge ? parseInt(propertyAge) : 2,
+        amenitiesCount: selectedAmenities.length || 0
+      };
+
+      // Validate that all required fields have valid values
+      if (!requestData.area || !requestData.propertyType || !requestData.bedrooms || 
+          !requestData.bathrooms || !requestData.squareFootage || !requestData.furnishing) {
+        setPredictionError("Missing required fields for prediction");
+        return;
+      }
+
+      console.log('Sending to backend:', requestData);
+
+      const response = await api.post('/api/rent-prediction/predict', requestData);
+
+      if (response.data && response.data.predicted_rent) {
+        setPredictedRent(response.data.predicted_rent);
+        setShowPrediction(true);
+        console.log('Prediction successful:', response.data);
+        console.log('Predicted rent:', response.data.predicted_rent);
+      } else {
+        console.log('Prediction failed - no predicted_rent in response');
+        setPredictionError("Failed to get rent prediction");
+      }
+    } catch (error) {
+      console.error('Rent prediction error:', error);
+      if (error.response?.data?.error) {
+        setPredictionError(error.response.data.error);
+      } else if (error.response?.status === 503) {
+        setPredictionError("Rent prediction service is temporarily unavailable");
+      } else if (error.response?.status === 400) {
+        setPredictionError("Invalid property details provided");
+      } else {
+        setPredictionError("Unable to predict rent at the moment");
+      }
+    } finally {
+      setPredictionLoading(false);
+    }
+  }, [city, bedrooms, bathrooms, squareFootage, furnishing, propertyAge, ptype, selectedAmenities]);
+
+  // Real-time prediction - only trigger once when all required fields are filled
+  useEffect(() => {
+    // Check if we have enough data for prediction
+    const hasRequiredData = city && ptype && bedrooms && bathrooms && squareFootage && furnishing;
+    
+    // Only predict if we have all required data AND we haven't predicted yet
+    if (hasRequiredData && !predictionLoading && !showPrediction) {
+      const timer = setTimeout(() => {
+        predictRent();
+      }, 1500); // Slightly longer debounce to avoid excessive calls
+
+      return () => clearTimeout(timer);
+    }
+  }, [city, ptype, bedrooms, bathrooms, squareFootage, furnishing, predictRent, predictionLoading, showPrediction]);
 
 
   /* ================= SUBMIT ================= */
@@ -799,34 +909,180 @@ export default function AddPropertyPage() {
             <div className="ap-grid-2">
               {ptype !== "pg" && (
                 <div className="ap-field">
-                  <label>Monthly Rent (₹) <span className="required">*</span></label>
+                  <label>Monthly Rent (Rs) <span className="required">*</span></label>
                   <input
                     type="number"
                     value={rentMonthly}
                     onChange={(e) => handleInputChange('rentMonthly', e.target.value)}
                     onBlur={() => handleBlur('rentMonthly')}
+                    onFocus={() => {
+                      // Show prediction when user focuses on rent input
+                      if (!showPrediction && !predictionLoading && city && bedrooms && bathrooms && squareFootage && furnishing && ptype) {
+                        predictRent();
+                      }
+                    }}
                     placeholder="e.g., 15000"
                     min={1000}
                     className={touched.rentMonthly && errors.rentMonthly ? 'error' : ''}
                     required
                   />
+                  
+                  {/* Rent Prediction Display */}
+                  {(showPrediction && predictedRent) && (
+                    <div className="rent-prediction-result">
+                      <div className="prediction-header">
+                        <span className="prediction-icon">?</span>
+                        <span className="prediction-title">
+                          {predictionLoading ? 'Calculating...' : 'AI Suggested Rent'}
+                        </span>
+                        {!predictionLoading && (
+                          <button
+                            type="button"
+                            className="btn-refresh-prediction"
+                            onClick={() => {
+                              setPredictionError("");
+                              predictRent();
+                            }}
+                            disabled={predictionLoading}
+                            title="Update prediction with current property details"
+                          >
+                            ?
+                          </button>
+                        )}
+                      </div>
+                      <div className="prediction-amount">
+                        Rs{predictedRent.toLocaleString('en-IN')}/month
+                      </div>
+                      <div className="prediction-actions">
+                        <button
+                          type="button"
+                          className="btn-use-prediction"
+                          onClick={() => {
+                            // Don't auto-fill, just hide the prediction
+                            setShowPrediction(false);
+                          }}
+                        >
+                          Got it
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-dismiss-prediction"
+                          onClick={() => setShowPrediction(false)}
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                      <div className="prediction-note">
+                        This is an AI estimate based on current property details. Click the refresh button (?) to update if you change any values.
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Real-time prediction loading indicator */}
+                  {predictionLoading && (
+                    <div className="prediction-loading">
+                      <div className="loading-spinner"></div>
+                      <span>Calculating rent based on your property details...</span>
+                    </div>
+                  )}
+                  
+                  {predictionError && (
+                    <div className="prediction-error">
+                      <span className="error-icon">?</span>
+                      {predictionError}
+                    </div>
+                  )}
+                  
                   {touched.rentMonthly && errors.rentMonthly && <span className="error-msg">{errors.rentMonthly}</span>}
                 </div>
               )}
 
               {ptype === "pg" && (
                 <div className="ap-field">
-                  <label>Rent per Person (₹) <span className="required">*</span></label>
+                  <label>Rent per Person (Rs) <span className="required">*</span></label>
                   <input
                     type="number"
                     value={rentPerPerson}
                     onChange={(e) => handleInputChange('rentPerPerson', e.target.value)}
+                    onFocus={() => {
+                      // Show prediction when user focuses on rent input
+                      if (!showPrediction && !predictionLoading && city && bedrooms && bathrooms && squareFootage && furnishing && ptype) {
+                        predictRent();
+                      }
+                    }}
                     onBlur={() => handleBlur('rentPerPerson')}
                     placeholder="e.g., 5000"
                     min={1000}
                     className={touched.rentPerPerson && errors.rentPerPerson ? 'error' : ''}
                     required
                   />
+                  
+                  {/* Rent Prediction Display for PG */}
+                  {(showPrediction && predictedRent) && (
+                    <div className="rent-prediction-result">
+                      <div className="prediction-header">
+                        <span className="prediction-icon">?</span>
+                        <span className="prediction-title">
+                          {predictionLoading ? 'Calculating...' : 'AI Suggested Rent per Person'}
+                        </span>
+                        {!predictionLoading && (
+                          <button
+                            type="button"
+                            className="btn-refresh-prediction"
+                            onClick={() => {
+                              setPredictionError("");
+                              predictRent();
+                            }}
+                            disabled={predictionLoading}
+                            title="Update prediction with current property details"
+                          >
+                            ?
+                          </button>
+                        )}
+                      </div>
+                      <div className="prediction-amount">
+                        Rs{Math.round(predictedRent / bedrooms).toLocaleString('en-IN')}/month
+                      </div>
+                      <div className="prediction-actions">
+                        <button
+                          type="button"
+                          className="btn-use-prediction"
+                          onClick={() => {
+                            // Don't auto-fill, just hide the prediction
+                            setShowPrediction(false);
+                          }}
+                        >
+                          Got it
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-dismiss-prediction"
+                          onClick={() => setShowPrediction(false)}
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                      <div className="prediction-note">
+                        This is an AI estimate based on current property details. Click the refresh button (?) to update if you change any values.
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Real-time prediction loading indicator */}
+                  {predictionLoading && (
+                    <div className="prediction-loading">
+                      <div className="loading-spinner"></div>
+                      <span>Calculating rent based on your property details...</span>
+                    </div>
+                  )}
+                  
+                  {predictionError && (
+                    <div className="prediction-error">
+                      <span className="error-icon">?</span>
+                      {predictionError}
+                    </div>
+                  )}
+                  
                   {touched.rentPerPerson && errors.rentPerPerson && <span className="error-msg">{errors.rentPerPerson}</span>}
                 </div>
               )}

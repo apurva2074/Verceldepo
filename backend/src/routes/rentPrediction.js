@@ -208,25 +208,11 @@ router.post('/predict', async (req, res) => {
 // Health check for rent prediction service
 router.get('/health', async (req, res) => {
   try {
-    // Check if Python server is available, but don't fail if it's not
-    let pythonServerStatus = 'unknown';
-    try {
-      const response = await callPythonModel('/health');
-      pythonServerStatus = 'healthy';
-    } catch (pythonError) {
-      pythonServerStatus = 'unavailable';
-      // Don't fail the health check, just note Python server status
-    }
-    
+    const response = await callPythonModel('/health');
     res.json({
       service: 'rent-prediction',
       status: 'healthy',
-      pythonServer: {
-        status: pythonServerStatus,
-        note: pythonServerStatus === 'unavailable' ? 
-          'Python ML server not running - rent prediction will use fallback calculation' : 
-          'Python ML server is running'
-      }
+      pythonServer: response
     });
   } catch (error) {
     res.status(503).json({

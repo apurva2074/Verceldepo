@@ -38,12 +38,8 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
       console.log('Secret file content length:', secretContent.length);
       
       try {
-        // Fix control characters in private key by properly escaping newlines
-        const fixedContent = secretContent
-          .replace(/\\n/g, '\\n') // Ensure newlines are properly escaped
-          .replace(/\n/g, '\\n');  // Convert actual newlines to escaped newlines
-        
-        serviceAccount = JSON.parse(fixedContent);
+        // Parse JSON with proper handling of private key newlines
+        serviceAccount = JSON.parse(secretContent);
         console.log('Successfully parsed Firebase secret JSON');
         
         // Debug: Check private key format
@@ -51,14 +47,36 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
           console.log('Private key exists in secret file');
           console.log('Private key starts with -----BEGIN:', serviceAccount.private_key.startsWith('-----BEGIN'));
           
-          // Fix the private key by converting escaped newlines back to actual newlines
-          serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+          // Fix the private key by ensuring proper newlines
+          if (serviceAccount.private_key.includes('\\n')) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+          }
           console.log('Private key contains actual newlines:', serviceAccount.private_key.includes('\n'));
         }
       } catch (parseError) {
         console.error('Failed to parse secret JSON:', parseError.message);
-        console.error('Secret content preview:', secretContent.substring(0, 200) + '...');
-        throw parseError;
+        console.error('Attempting to fix JSON formatting...');
+        
+        // Try to fix common JSON issues
+        try {
+          // Remove any control characters and fix formatting
+          const cleanedContent = secretContent
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+            .replace(/\\n/g, '\\n') // Escape newlines in JSON
+            .replace(/\n/g, '\\n');  // Convert actual newlines to escaped newlines
+          
+          serviceAccount = JSON.parse(cleanedContent);
+          console.log('Successfully parsed Firebase secret JSON after cleaning');
+          
+          // Fix private key newlines
+          if (serviceAccount.private_key && serviceAccount.private_key.includes('\\n')) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+          }
+        } catch (secondError) {
+          console.error('Failed to parse even after cleaning:', secondError.message);
+          console.error('Secret content preview:', secretContent.substring(0, 200) + '...');
+          throw new Error('Unable to parse Firebase secret file. Please check the JSON format.');
+        }
       }
     } else {
       // Fallback to environment variables
