@@ -29,18 +29,7 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Add test routes
-app.get("/", (req, res) => {
-  res.send("Backend is running \ud83d\ude80");
-});
-
-app.head("/", (req, res) => {
-  res.status(200).end();
-});
-
-app.get("/test", (req, res) => {
-  res.json({ message: "Backend connected successfully \u2705" });
-});
+// Note: Routes are defined in src/app.js to avoid conflicts
 
 // Start server
 const server = app.listen(PORT, () => {
