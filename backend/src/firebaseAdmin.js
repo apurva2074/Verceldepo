@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
   try {
     // Check multiple possible secret file paths
     const possiblePaths = [
+      '/etc/secrets/firebase-service-account.json',
       '/etc/secrets/serviceAccountKey.json',
       '/etc/secrets/firebase-serviceAccountKey.json',
       '/tmp/serviceAccountKey.json',
