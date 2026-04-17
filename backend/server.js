@@ -29,13 +29,22 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
+// Add test routes
+app.get("/", (req, res) => {
+  res.send("Backend is running \ud83d\ude80");
+});
+
+app.get("/test", (req, res) => {
+  res.json({ message: "Backend connected successfully \u2705" });
+});
+
 // Start server
 const server = app.listen(PORT, () => {
-  console.log(`🚀 RentIt Backend Server running successfully!`);
-  console.log(`🌐 Server URL: http://localhost:${PORT}`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
-  console.log(`📝 Press Ctrl+C to stop the server`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`\ud83d\ude80 RentIt Backend Server running successfully!`);
+  console.log(`\ud83c\udf10 Server URL: http://localhost:${PORT}`);
+  console.log(`\ud83d\udce1 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`\ud83d\udcdd Press Ctrl+C to stop the server`);
+  console.log(`\ud83d\udd27 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Handle server errors
