@@ -13,14 +13,46 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
   const path = require('path');
   
   try {
-    // Check if secret file exists (Render mounts secrets at /etc/secrets/)
-    const secretFilePath = '/etc/secrets/serviceAccountKey.json';
-    if (fs.existsSync(secretFilePath)) {
+    // Check multiple possible secret file paths
+    const possiblePaths = [
+      '/etc/secrets/serviceAccountKey.json',
+      '/etc/secrets/firebase-serviceAccountKey.json',
+      '/tmp/serviceAccountKey.json',
+      './serviceAccountKey.json'
+    ];
+    
+    let secretFilePath = null;
+    for (const path of possiblePaths) {
+      console.log(`Checking secret file path: ${path}`);
+      if (fs.existsSync(path)) {
+        secretFilePath = path;
+        console.log(`Found Firebase secret file at: ${path}`);
+        break;
+      }
+    }
+    
+    if (secretFilePath) {
       console.log('Using Firebase secret file from Render');
-      serviceAccount = require(secretFilePath);
+      const secretContent = fs.readFileSync(secretFilePath, 'utf8');
+      console.log('Secret file content length:', secretContent.length);
+      
+      try {
+        serviceAccount = JSON.parse(secretContent);
+        console.log('Successfully parsed Firebase secret JSON');
+        
+        // Debug: Check private key format
+        if (serviceAccount.private_key) {
+          console.log('Private key exists in secret file');
+          console.log('Private key starts with -----BEGIN:', serviceAccount.private_key.startsWith('-----BEGIN'));
+          console.log('Private key contains newlines:', serviceAccount.private_key.includes('\n'));
+        }
+      } catch (parseError) {
+        console.error('Failed to parse secret JSON:', parseError.message);
+        throw parseError;
+      }
     } else {
       // Fallback to environment variables
-      console.log('Using Firebase environment variables');
+      console.log('No secret file found, using Firebase environment variables');
       
       if (!process.env.FIREBASE_PRIVATE_KEY_BASE64 || !process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
         throw new Error('Missing required Firebase environment variables. Please check FIREBASE_PRIVATE_KEY_BASE64, FIREBASE_PROJECT_ID, and FIREBASE_CLIENT_EMAIL');
@@ -29,6 +61,9 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
       // Decode base64 private key for environment variable deployment
       const privateKeyBuffer = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64');
       let privateKey = privateKeyBuffer.toString('utf8');
+      
+      console.log('Decoded private key length:', privateKey.length);
+      console.log('Decoded private key starts with MIIE:', privateKey.startsWith('MIIE'));
       
       // Check if it already has headers
       if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
