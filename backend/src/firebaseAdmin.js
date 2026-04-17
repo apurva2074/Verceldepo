@@ -58,24 +58,29 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
         throw new Error('Missing required Firebase environment variables. Please check FIREBASE_PRIVATE_KEY_BASE64, FIREBASE_PROJECT_ID, and FIREBASE_CLIENT_EMAIL');
       }
       
-      // Create service account object directly from environment variables
-      console.log('Creating service account from environment variables');
+      // Create temporary service account file with correct PEM format
+      console.log('Creating temporary service account file');
       
       // Decode base64 private key
       const privateKeyBuffer = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64');
-      const privateKeyContent = privateKeyBuffer.toString('utf8');
+      let privateKeyContent = privateKeyBuffer.toString('utf8');
       
       console.log('Decoded private key length:', privateKeyContent.length);
       console.log('Decoded private key starts with MIIE:', privateKeyContent.startsWith('MIIE'));
       
-      // Create the complete service account object with proper private key formatting
-      serviceAccount = {
+      // Ensure proper PEM formatting
+      if (!privateKeyContent.includes('-----BEGIN PRIVATE KEY-----')) {
+        privateKeyContent = `-----BEGIN PRIVATE KEY-----\n${privateKeyContent}\n-----END PRIVATE KEY-----\n`;
+      }
+      
+      // Create complete service account object
+      const serviceAccountData = {
         type: "service_account",
         project_id: process.env.FIREBASE_PROJECT_ID,
         private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "firebase-admin-key",
-        private_key: privateKeyContent, // Use the decoded key as-is
+        private_key: privateKeyContent,
         client_email: process.env.FIREBASE_CLIENT_EMAIL,
-        client_id: process.env.FIREBASE_CLIENT_ID || "123456789",
+        client_id: process.env.FIREBASE_CLIENT_ID || "115408859884381730014",
         auth_uri: "https://accounts.google.com/o/oauth2/auth",
         token_uri: "https://oauth2.googleapis.com/token",
         auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
@@ -83,9 +88,14 @@ if (process.env.NODE_ENV === 'production' || process.env.DEV_MODE === 'false') {
         universe_domain: "googleapis.com"
       };
       
-      console.log('Service account object created with project_id:', serviceAccount.project_id);
-      console.log('Service account client_email:', serviceAccount.client_email);
-      console.log('Private key starts with -----BEGIN:', serviceAccount.private_key.startsWith('-----BEGIN'));
+      // Write to temporary file
+      const tempServiceAccountPath = '/tmp/serviceAccountKey.json';
+      fs.writeFileSync(tempServiceAccountPath, JSON.stringify(serviceAccountData, null, 2));
+      console.log('Temporary service account file created at:', tempServiceAccountPath);
+      
+      // Load from temporary file
+      serviceAccount = require(tempServiceAccountPath);
+      console.log('Service account loaded from temporary file');
     }
   } catch (error) {
     console.error('Error loading Firebase credentials:', error.message);
