@@ -21,6 +21,7 @@ const tenantRouter = require("./routes/tenant")({ admin, db });
 const paymentsRouter = require("./routes/payments");
 const verifyDocumentsRouter = require("./routes/verifyDocuments");
 const enhancedTenantUploadRouter = require("./routes/enhancedTenantUpload");
+const rentPredictionRouter = require("./routes/rentPrediction");
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use("/api/bookings", bookingsRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/ai", verifyDocumentsRouter);
 app.use("/api/tenant", enhancedTenantUploadRouter);
+app.use("/api/rent-prediction", rentPredictionRouter);
 
 // 404 handler for undefined routes
 app.use(notFoundMiddleware);
