@@ -34,6 +34,10 @@ app.get("/", (req, res) => {
   res.send("Backend is running \ud83d\ude80");
 });
 
+app.head("/", (req, res) => {
+  res.status(200).end();
+});
+
 app.get("/test", (req, res) => {
   res.json({ message: "Backend connected successfully \u2705" });
 });
