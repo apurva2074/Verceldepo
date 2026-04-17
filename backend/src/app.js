@@ -28,7 +28,8 @@ const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
   : [
-      'https://verceldepo.vercel.app',  // Your Vercel frontend
+      'https://verceldepo-8eogt672o-apurva2074s-projects.vercel.app',  // Your actual Vercel frontend
+      'https://verceldepo.vercel.app',  // Your Vercel frontend (fallback)
       'http://localhost:3000',         // Local development
       'http://localhost:3001'          // Alternative local port
     ];
