@@ -72,4 +72,9 @@ app.use(errorHandlerMiddleware);
 
 app.get("/", (_req, res) => res.redirect("/api/health"));
 
+// Add HEAD route for root path (Render health check)
+app.head("/", (_req, res) => {
+  res.status(200).end();
+});
+
 module.exports = app;
