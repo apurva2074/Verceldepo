@@ -166,24 +166,22 @@ service cloud.firestore {
       allow delete: if isParticipant(resource.data.participants);
     }
 
-    // MESSAGES COLLECTION
-    match /messages/{messageId} {
+    // MESSAGES SUBCOLLECTION
+    match /chats/{chatId}/messages/{messageId} {
       // Read: Only chat participants can read messages
       allow read: if isAuthenticated() && 
-                     exists(/databases/$(database)/documents/chats/$(resource.data.chatId)) &&
-                     isParticipant(get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.participants);
+                     isParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
       
       // Create: Only authenticated users can create messages and must be the sender
       allow create: if isAuthenticated() &&
                        request.resource.data.senderId == request.auth.uid &&
-                       request.resource.data.keys().hasAll(['chatId', 'senderId', 'text', 'createdAt']) &&
-                       request.resource.data.keys().hasOnly(['chatId', 'senderId', 'text', 'createdAt']) &&
+                       request.resource.data.keys().hasAll(['chatId', 'senderId', 'message', 'timestamp']) &&
+                       request.resource.data.keys().hasOnly(['chatId', 'senderId', 'message', 'timestamp', 'read', 'readAt', 'edited', 'editedAt', 'deleted', 'deletedAt', 'senderRole']) &&
                        request.resource.data.chatId is string &&
-                       request.resource.data.text is string &&
-                       request.resource.data.createdAt is timestamp &&
-                       // Verify sender is a participant in the chat
-                       exists(/databases/$(database)/documents/chats/$(request.resource.data.chatId)) &&
-                       request.auth.uid in get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.participants;
+                       request.resource.data.message is string &&
+                       request.resource.data.timestamp is timestamp &&
+                       // Verify sender is a participant in the chat using path parameter
+                       request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
       
       // Update: Messages are immutable - no updates allowed
       allow update: if false;

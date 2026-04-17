@@ -75,6 +75,11 @@ export const isAuthenticated = () => {
  */
 export const professionalLogin = async (email, password, selectedRole = null) => {
   try {
+    // Validate Firebase configuration first
+    if (!process.env.REACT_APP_FIREBASE_API_KEY || !process.env.REACT_APP_FIREBASE_PROJECT_ID) {
+      throw new Error('Firebase configuration is missing. Please check environment variables.');
+    }
+    
     const { signInWithEmailAndPassword } = await import('firebase/auth');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     
@@ -141,12 +146,26 @@ export const professionalLogin = async (email, password, selectedRole = null) =>
         role: null,
         error: 'Invalid email format. Please enter a valid email address.'
       };
+    } else if (error.code === 'auth/invalid-credential') {
+      return {
+        success: false,
+        user: null,
+        role: null,
+        error: 'Invalid email or password. Please check your credentials and try again.'
+      };
     } else if (error.message.includes('Profile not found')) {
       return {
         success: false,
         user: null,
         role: null,
         error: error.message
+      };
+    } else if (error.message.includes('Profile verification failed')) {
+      return {
+        success: false,
+        user: null,
+        role: null,
+        error: 'Unable to verify your profile. Please try again or contact support.'
       };
     }
     

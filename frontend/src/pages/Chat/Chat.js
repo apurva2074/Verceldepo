@@ -151,8 +151,8 @@ export default function Chat() {
           ...messageData,
           // Ensure required fields exist with defaults
           senderId: messageData.senderId || 'unknown',
-          text: messageData.text || '',
-          createdAt: messageData.createdAt || null
+          message: messageData.message || '',
+          timestamp: messageData.timestamp || null
         };
       });
       setMessages(messagesData);
@@ -230,7 +230,13 @@ export default function Chat() {
         }
         
         // Navigate back to appropriate dashboard
-        navigate('/dashboard');
+        // Check if user is likely an owner by checking their current path
+        const isOwnerPath = window.location.pathname.includes('/owner');
+        if (isOwnerPath) {
+          navigate('/owner/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     };
 
