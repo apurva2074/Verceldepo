@@ -25,7 +25,7 @@ const rentPredictionRouter = require("./routes/rentPrediction");
 
 const app = express();
 
-// Temporary: Allow all origins for testing
+// Temporary: Allow all origins for testing - Updated: 2025-04-17
 app.use(cors()); // Allows any origin - not recommended for production but fine for testing
 app.use(express.json());
 
