@@ -25,25 +25,8 @@ const rentPredictionRouter = require("./routes/rentPrediction");
 
 const app = express();
 
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',')
-  : [
-      'https://verceldepo-8eogt672o-apurva2074s-projects.vercel.app',  // Your actual Vercel frontend
-      'https://verceldepo.vercel.app',  // Your Vercel frontend (fallback)
-      'http://localhost:3000',         // Local development
-      'http://localhost:3001'          // Alternative local port
-    ];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
+// Temporary: Allow all origins for testing
+app.use(cors()); // Allows any origin - not recommended for production but fine for testing
 app.use(express.json());
 
 // Serve uploaded files statically
