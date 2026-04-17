@@ -64,17 +64,18 @@ app.use("/api/ai", verifyDocumentsRouter);
 app.use("/api/tenant", enhancedTenantUploadRouter);
 app.use("/api/rent-prediction", rentPredictionRouter);
 
-// 404 handler for undefined routes
-app.use(notFoundMiddleware);
-
-// Global error handler
-app.use(errorHandlerMiddleware);
-
+// Define specific routes BEFORE the 404 handler
 app.get("/", (_req, res) => res.redirect("/api/health"));
 
 // Add HEAD route for root path (Render health check)
 app.head("/", (_req, res) => {
   res.status(200).end();
 });
+
+// 404 handler for undefined routes (must be after all specific routes)
+app.use(notFoundMiddleware);
+
+// Global error handler (must be after the 404 handler)
+app.use(errorHandlerMiddleware);
 
 module.exports = app;
