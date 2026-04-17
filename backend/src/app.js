@@ -27,7 +27,11 @@ const app = express();
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
-  : ['http://localhost:3000', 'http://localhost:3001'];
+  : [
+      'https://verceldepo.vercel.app',  // Your Vercel frontend
+      'http://localhost:3000',         // Local development
+      'http://localhost:3001'          // Alternative local port
+    ];
 
 app.use(cors({
   origin: (origin, callback) => {
